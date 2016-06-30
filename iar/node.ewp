@@ -1706,6 +1706,9 @@
     <group>
       <name>xprintf</name>
       <file>
+        <name>$PROJ_DIR$\..\utils\xprintf\sysprintf.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\utils\xprintf\xprintf.c</name>
       </file>
     </group>

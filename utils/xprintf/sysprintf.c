@@ -4,7 +4,6 @@
 
 #include "xprintf.h"
 #include "basictype.h"
-#include "contiki.h"
 
 #include "sysprintf.h"
 
@@ -61,15 +60,6 @@ void  __xstd_printf(int level, const char * fmt,...)
     //int rc = 0;
     va_list ap;
 
-    volatile struct process *pTd = (struct process *)PROCESS_CURRENT();
-    if(((unsigned char)level <= g_nDebufLevel && g_nDebufLevel!=20))
-    {
-		if (pTd )
-		{
-			if (strcmp_ex(pTd->name, "Event timer"))
-				xprintf("%-20s|", pTd->name);
-		}
-	}
     if(((unsigned char)level <= g_nDebufLevel && g_nDebufLevel!=20))
     {
        va_start(ap, fmt);
@@ -82,21 +72,6 @@ void  __xstd_printf(int level, const char * fmt,...)
 
 int __xstd_dump(int level,const char *sczTitle,const void *pciBuf,int nSize)
 {
-
-    struct process *pTd = (struct process *)PROCESS_CURRENT();
-
-	if(level <= g_nDebufLevel && g_nDebufLevel!=20)
-	{
-		if (pTd)
-		{
-			if (strcmp_ex(pTd->name, "Event timer"))
-			{
-				xprintf("%-20s|", pTd->name);
-				xprintf("\r\n");
-			}
-		}
-	}
-
 	if(level <= g_nDebufLevel && g_nDebufLevel!=20)
 	{
 		int i,n;
@@ -141,28 +116,6 @@ int __xstd_dump(int level,const char *sczTitle,const void *pciBuf,int nSize)
 	return 0;
 }
 
-extern unsigned int sysGetSP(unsigned int bIsMSP);
-void sysPrintExp(unsigned int dwPos)
-{
-	#if 0
-	//unsigned int *pSP = (void*)sysGetSP(1);//PSP
-	
-	XPRINTF((0x0,"Exception Handled,type %d\r\n",dwPos));
-	XPRINTF((0x0,"----Register List----\r\n"));
-	XPRINTF((0x0,"MSP: %08X\r\n",sysGetSP(1)));
-	XPRINTF((0x0,"PSP: %08X\r\n\r\n",pSP));
-	
-	XPRINTF((0x0,"R0 : %08X\r\n",pSP[0]));
-	XPRINTF((0x0,"R1 : %08X\r\n",pSP[1]));
-	XPRINTF((0x0,"R2 : %08X\r\n",pSP[2]));
-	XPRINTF((0x0,"R3 : %08X\r\n",pSP[3]));
-	XPRINTF((0x0,"R12: %08X\r\n",pSP[4]));
-	XPRINTF((0x0,"LR : %08X\r\n",pSP[5]));
-	XPRINTF((0x0,"PC : %08X\r\n",pSP[6]));
-	XPRINTF((0x0,"PSR: %08X\r\n",pSP[7]));
-	#endif
-	PRINTF(".%d", dwPos);
-}
 
 
 
