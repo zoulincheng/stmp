@@ -251,6 +251,8 @@
           <state>$PROJ_DIR$\..\stm8l15x_lib\inc</state>
           <state>$PROJ_DIR$\..\user\inc</state>
           <state>$PROJ_DIR$\..\utils\xprintf</state>
+          <state>$PROJ_DIR$\..\drivers</state>
+          <state>$PROJ_DIR$\..\utils</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1572,6 +1574,12 @@
   </configuration>
   <group>
     <name>driver</name>
+    <file>
+      <name>$PROJ_DIR$\..\drivers\board_init.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\drivers\debugUart.c</name>
+    </file>
   </group>
   <group>
     <name>FWLib</name>
@@ -1671,9 +1679,36 @@
   </group>
   <group>
     <name>utils</name>
-    <file>
-      <name>$PROJ_DIR$\..\utils\xprintf\xprintf.c</name>
-    </file>
+    <group>
+      <name>lib</name>
+      <file>
+        <name>$PROJ_DIR$\..\utils\lib\crc16.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\utils\lib\list.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\utils\lib\memb.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\utils\lib\mmem.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\utils\lib\random.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\utils\lib\ringbuf.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\utils\lib\ringbufindex.c</name>
+      </file>
+    </group>
+    <group>
+      <name>xprintf</name>
+      <file>
+        <name>$PROJ_DIR$\..\utils\xprintf\xprintf.c</name>
+      </file>
+    </group>
   </group>
 </project>
 

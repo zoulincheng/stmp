@@ -46,7 +46,7 @@
 
 #include "mmem.h"
 #include "list.h"
-#include "contiki-conf.h"
+
 #include <string.h>
 
 #ifdef MMEM_CONF_SIZE

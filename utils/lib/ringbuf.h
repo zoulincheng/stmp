@@ -53,8 +53,8 @@
 
 #ifndef RINGBUF_H_
 #define RINGBUF_H_
+#include "basictype.h"
 
-#include "contiki-conf.h"
 
 /**
  * \brief      Structure that holds the state of a ring buffer.

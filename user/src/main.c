@@ -1,6 +1,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm8l15x.h"
+#include "board_init.h"
+#include "debugUart.h"
+#include "xprintf.h"
 
 /**
   * @brief  Main program.
@@ -9,6 +12,9 @@
   */
 void main(void)
 {
+	boardClkInit( );
+	debugUartInit( );
+	xdev_out(dbgSendChar);
 	while (1)
 	{
 	}

@@ -39,8 +39,8 @@
 
 #ifndef __RINGBUFINDEX_H__
 #define __RINGBUFINDEX_H__
+#include "basictype.h"
 
-#include "contiki-conf.h"
 
 struct ringbufindex {
   uint8_t mask;
