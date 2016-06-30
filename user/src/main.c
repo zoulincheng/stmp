@@ -3,7 +3,24 @@
 #include "stm8l15x.h"
 #include "board_init.h"
 #include "debugUart.h"
-#include "xprintf.h"
+#include "sysprintf.h"
+#include "boardiodef.h"
+
+
+/**
+  * @brief  Inserts a delay time.
+  * @param  nCount: specifies the delay time length.
+  * @retval None
+  */
+void delay(uint16_t nCount)
+{
+	/* Decrement nCount value */
+	while (nCount != 0)
+	{
+		nCount--;
+	}
+}
+
 
 /**
   * @brief  Main program.
@@ -14,9 +31,16 @@ void main(void)
 {
 	boardClkInit( );
 	debugUartInit( );
-	xdev_out(dbgSendChar);
 	while (1)
 	{
+		delay(0xffff);
+		delay(0xffff);
+		LED_SET(1);
+		XPRINTF((0, "sys1\r\n"));
+		delay(0xffff);
+		delay(0xffff);		
+		LED_SET(0);
+		XPRINTF((0, "sys2\r\n"));
 	}
 }
 

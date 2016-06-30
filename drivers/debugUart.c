@@ -4,6 +4,12 @@
 
 void debugUartInit(void)
 {
+ 	GPIO_Init(USART1_TX_PORT, USART1_TX_PIN, GPIO_Mode_Out_PP_High_Fast);
+ 	GPIO_Init(USART1_RX_PORT, USART1_RX_PIN, GPIO_Mode_In_PU_No_IT);
+	SYSCFG_REMAPDeInit();                                                         //重映射初始化
+    SYSCFG_REMAPPinConfig(REMAP_Pin_USART1TxRxPortA, ENABLE);                     //将串口1的TX、RX分别映射到PA2、PA3
+    CLK_PeripheralClockConfig(CLK_Peripheral_USART1, ENABLE);                     //开串口时钟
+    USART_DeInit(USART1);                                                         //串口初始化
 	//init debug usart1 pin
 	/* USART configured as follow:
 	- BaudRate = 115200 baud  
@@ -13,14 +19,6 @@ void debugUartInit(void)
 	- Receive and transmit enabled
 	- USART Clock disabled
 	*/
-	 /* Enable USART clock */
-	CLK_PeripheralClockConfig(CLK_Peripheral_USART1, ENABLE);
-
-	/* Configure USART Tx as alternate function push-pull  (software pull up)*/
-	GPIO_ExternalPullUpConfig(USART1_TX_PORT, USART1_TX_PIN, ENABLE);
-
-	/* Configure USART Rx as alternate function push-pull  (software pull up)*/
-	GPIO_ExternalPullUpConfig(USART1_RX_PORT, USART1_RX_PIN, ENABLE);
 
 	/* USART configuration */
 	USART_Init(USART1, 
@@ -46,9 +44,11 @@ void debugUartInit(void)
 
 int dbgSendChar(int ch) 
 {
-	while (!(USART1->SR & USART_FLAG_TXE)); // USART1 可换成你程序中通信的串口
+	//while (!(USART1->SR & USART_FLAG_TXE)); // USART1 可换成你程序中通信的串口
+	//while (USART_GetFlagStatus(EVAL_COM1, USART_FLAG_TC) == RESET);
 	/* Transmit Data */
 	USART1->DR = (uint8_t)ch;
+	while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
 	return (ch);
 }
 

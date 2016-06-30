@@ -20,6 +20,7 @@
 void (*xfunc_out)(unsigned char);	/* Pointer to the output stream */
 static char *outptr;
 
+extern int dbgSendChar(int ch);
 
 
 /*----------------------------------------------*/
@@ -37,7 +38,8 @@ void xputc (char c)
 		return;
 	}
 
-	if (xfunc_out) xfunc_out((unsigned char)c);
+	//if (xfunc_out) xfunc_out((unsigned char)c);
+	dbgSendChar((unsigned char)c);
 }
 
 
