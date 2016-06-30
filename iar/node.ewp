@@ -250,6 +250,7 @@
           <name>CCIncludePath2</name>
           <state>$PROJ_DIR$\..\stm8l15x_lib\inc</state>
           <state>$PROJ_DIR$\..\user\inc</state>
+          <state>$PROJ_DIR$\..\utils\xprintf</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1570,6 +1571,9 @@
     </settings>
   </configuration>
   <group>
+    <name>driver</name>
+  </group>
+  <group>
     <name>FWLib</name>
     <file>
       <name>$PROJ_DIR$\..\stm8l15x_lib\src\stm8l15x_adc.c</name>
@@ -1663,6 +1667,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\user\src\stm8l15x_it.c</name>
+    </file>
+  </group>
+  <group>
+    <name>utils</name>
+    <file>
+      <name>$PROJ_DIR$\..\utils\xprintf\xprintf.c</name>
     </file>
   </group>
 </project>

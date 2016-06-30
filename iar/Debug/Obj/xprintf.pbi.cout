@@ -1,4 +1,4 @@
-"E:\hwpro-2016\20160627_L\stm8l15x_lib\src\stm8l15x_gpio.c"
+"E:\hwpro-2016\20160627_L\utils\xprintf\xprintf.c"
 -std=c99
 -ferror-limit=100
 -I
@@ -230,7 +230,7 @@ E:\hwpro-2016\20160627_L\utils\xprintf
 -D__HAS_LOCATED_WITH_INIT__=1
 -D__IAR_COMPILERBASE__=593416
 -D__DATE__="Jun 30 2016"
--D__TIME__="11:22:34"
+-D__TIME__="11:22:38"
 -D__STDC__=1
 -D__STDC_VERSION__=199901L
 -D__STDC_HOSTED__=1

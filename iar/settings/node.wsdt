@@ -24,7 +24,7 @@
       </Build>
     </Static>
     <Windows>
-      <Wnd0>
+      <Wnd2>
         <Tabs>
           <Tab>
             <Identity>TabID-591-27811</Identity>
@@ -33,14 +33,13 @@
             <Session>
               <NodeDict>
                 <ExpandedNode>node</ExpandedNode>
-                <ExpandedNode>node/user</ExpandedNode>
               </NodeDict>
             </Session>
           </Tab>
         </Tabs>
         <SelectedTab>0</SelectedTab>
-      </Wnd0>
-      <Wnd1>
+      </Wnd2>
+      <Wnd3>
         <Tabs>
           <Tab>
             <Identity>TabID-5421-28540</Identity>
@@ -50,7 +49,7 @@
           </Tab>
         </Tabs>
         <SelectedTab>0</SelectedTab>
-      </Wnd1>
+      </Wnd3>
     </Windows>
     <Editor>
       <Pane>
@@ -63,8 +62,8 @@
           <SelEnd>0</SelEnd>
           <XPos2>0</XPos2>
           <YPos2>32</YPos2>
-          <SelStart2>1611</SelStart2>
-          <SelEnd2>1622</SelEnd2>
+          <SelStart2>2132</SelStart2>
+          <SelEnd2>2132</SelEnd2>
         </Tab>
         <ActiveTab>0</ActiveTab>
       </Pane>
@@ -90,7 +89,7 @@
       <Left>
         <Row0>
           <Sizes>
-            <Wnd0>
+            <Wnd2>
               <Rect>
                 <Top>-2</Top>
                 <Left>-2</Left>
@@ -105,7 +104,7 @@
                 <sizeVertCX>145833</sizeVertCX>
                 <sizeVertCY>758517</sizeVertCY>
               </Rect>
-            </Wnd0>
+            </Wnd2>
           </Sizes>
         </Row0>
       </Left>
@@ -117,7 +116,7 @@
       <Bottom>
         <Row0>
           <Sizes>
-            <Wnd1>
+            <Wnd3>
               <Rect>
                 <Top>-2</Top>
                 <Left>-2</Left>
@@ -132,7 +131,7 @@
                 <sizeVertCX>104167</sizeVertCX>
                 <sizeVertCY>200401</sizeVertCY>
               </Rect>
-            </Wnd1>
+            </Wnd3>
           </Sizes>
         </Row0>
       </Bottom>
