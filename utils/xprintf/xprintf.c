@@ -98,6 +98,7 @@ void xvprintf (
 )
 {
 	unsigned int r, i, j, w, f;
+	//unsigned long r, i, j, w, f;
 	unsigned long v;
 	char s[16], c, d, *p;
 

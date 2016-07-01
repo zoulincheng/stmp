@@ -1581,6 +1581,9 @@
       <name>$PROJ_DIR$\..\drivers\debugUart.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\drivers\iic.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\drivers\rtc.c</name>
     </file>
     <file>
@@ -1678,6 +1681,9 @@
     <name>si4438</name>
     <file>
       <name>$PROJ_DIR$\..\si4438\radiolib\si446x.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\si4438\radiolib\si446x_rf.c</name>
     </file>
   </group>
   <group>

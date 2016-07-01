@@ -147,12 +147,14 @@ INTERRUPT_HANDLER(EXTID_H_IRQHandler, 7)
   * @param  None
   * @retval None
   */
+#if 0
 INTERRUPT_HANDLER(EXTI0_IRQHandler, 8)
 {
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
 }
+#endif
 
 /**
   * @brief External IT PIN1 Interrupt routine.
@@ -190,6 +192,8 @@ INTERRUPT_HANDLER(EXTI3_IRQHandler, 11)
   */
 }
 
+
+#if 0
 /**
   * @brief External IT PIN4 Interrupt routine.
   * @param  None
@@ -201,7 +205,7 @@ INTERRUPT_HANDLER(EXTI4_IRQHandler, 12)
      it is recommended to set a breakpoint on the following instruction.
   */
 }
-
+#endif
 /**
   * @brief External IT PIN5 Interrupt routine.
   * @param  None

@@ -43,7 +43,7 @@ void main(void)
 		delay(0xffff);
 		delay(0xffff);
 		LED_SET(1);
-		//XPRINTF((0, "sys1\r\n"));
+		//XPRINTF((0, "%ld\r\n", 12345678));
 		//SI446X_PART_INFO(NULL);
 		delay(0xffff);
 		delay(0xffff);

@@ -2,7 +2,7 @@
 #define _RTC_H
 
 
-#define RTC_CLK_FREQ		(38000/16)
+#define RTC_CLK_FREQ		(38000/32)//
 
 /**
  * @name    Time conversion utilities
@@ -19,7 +19,7 @@
  * @api
  */
 #define S2ST(sec)                                                           \
-  ((u_long)((uint32_t)(sec) * (uint32_t)RTC_CLK_FREQ))
+  ((u_long)((u_long)(sec) * (u_long)RTC_CLK_FREQ))
 
 /**
  * @brief   Milliseconds to system ticks.
@@ -32,8 +32,8 @@
  * @api
  */
 #define MS2ST(msec)                                                      \
-  ((u_long)(((((uint32_t)(msec)) *                                       \
-                 ((uint32_t)RTC_CLK_FREQ)) + 999UL) / 1000UL))
+  ((u_long)(((((u_long)(msec)) *                                       \
+                 ((u_long)RTC_CLK_FREQ)) + 999UL) / 1000UL))
 
 
 /**
@@ -47,8 +47,15 @@
  * @api
  */
 #define US2ST(usec)                                                      \
-  ((u_long)(((((uint32_t)(usec)) *                                       \
-                 ((uint32_t)RTC_CLK_FREQ)) + 999999UL) / 1000000UL))
+  ((u_long)(((((u_long)(usec)) *                                       \
+                 ((u_long)RTC_CLK_FREQ)) + 999999UL) / 1000000UL))
+
+
+#define RTC_MAX_WAKE_UP_TIME_TICKS	0xffff
+#define RTC_MAX_WAKE_UP_TIME_MS		55000			//#define RTC_CLK_FREQ		(38000/32)//
+
+
+
 
 void rtcInit(void);
 void rtcOn(U16 uwWakeTime);
