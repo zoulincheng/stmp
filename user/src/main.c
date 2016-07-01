@@ -6,7 +6,7 @@
 #include "sysprintf.h"
 #include "boardiodef.h"
 #include "basictype.h"
-
+#include "rtc.h"
 
 /**
   * @brief  Inserts a delay time.
@@ -33,6 +33,9 @@ void main(void)
 	boardClkInit( );
 	debugUartInit( );
 	si446xRadioInit( );
+	rtcInit( );
+	rtcOn(MS2ST(500));
+	enableInterrupts( );
 	while (1)
 	{
 		delay(0xffff);
@@ -40,16 +43,18 @@ void main(void)
 		delay(0xffff);
 		delay(0xffff);
 		LED_SET(1);
-		XPRINTF((0, "sys1\r\n"));
-		SI446X_PART_INFO(NULL);
+		//XPRINTF((0, "sys1\r\n"));
+		//SI446X_PART_INFO(NULL);
 		delay(0xffff);
 		delay(0xffff);
 		delay(0xffff);
 		delay(0xffff);
 		LED_SET(0);
-		XPRINTF((0, "sys2\r\n"));
+		//XPRINTF((0, "sys2\r\n"));
 	}
 }
+
+
 
 
 #ifdef  USE_FULL_ASSERT

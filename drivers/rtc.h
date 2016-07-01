@@ -2,7 +2,56 @@
 #define _RTC_H
 
 
+#define RTC_CLK_FREQ		(38000/16)
+
+/**
+ * @name    Time conversion utilities
+ * @{
+ */
+/**
+ * @brief   Seconds to system ticks.
+ * @details Converts from seconds to system ticks number.
+ * @note    The result is rounded upward to the next tick boundary.
+ *
+ * @param[in] sec       number of seconds
+ * @return              The number of ticks.
+ *
+ * @api
+ */
+#define S2ST(sec)                                                           \
+  ((u_long)((uint32_t)(sec) * (uint32_t)RTC_CLK_FREQ))
+
+/**
+ * @brief   Milliseconds to system ticks.
+ * @details Converts from milliseconds to system ticks number.
+ * @note    The result is rounded upward to the next tick boundary.
+ *
+ * @param[in] msec      number of milliseconds
+ * @return              The number of ticks.
+ *
+ * @api
+ */
+#define MS2ST(msec)                                                      \
+  ((u_long)(((((uint32_t)(msec)) *                                       \
+                 ((uint32_t)RTC_CLK_FREQ)) + 999UL) / 1000UL))
 
 
+/**
+ * @brief   Microseconds to system ticks.
+ * @details Converts from microseconds to system ticks number.
+ * @note    The result is rounded upward to the next tick boundary.
+ *
+ * @param[in] usec      number of microseconds
+ * @return              The number of ticks.
+ *
+ * @api
+ */
+#define US2ST(usec)                                                      \
+  ((u_long)(((((uint32_t)(usec)) *                                       \
+                 ((uint32_t)RTC_CLK_FREQ)) + 999999UL) / 1000000UL))
+
+void rtcInit(void);
+void rtcOn(U16 uwWakeTime);
+void rtc_off(void);
 
 #endif

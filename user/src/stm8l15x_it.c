@@ -104,17 +104,7 @@ INTERRUPT_HANDLER(DMA1_CHANNEL2_3_IRQHandler, 3)
   */
 }
 
-/**
-  * @brief RTC / CSS_LSE Interrupt routine.
-  * @param  None
-  * @retval None
-  */
-INTERRUPT_HANDLER(RTC_CSSLSE_IRQHandler, 4)
-{
-  /* In order to detect unexpected events during development,
-     it is recommended to set a breakpoint on the following instruction.
-  */
-}
+
 
 /**
   * @brief External IT PORTE/F and PVD Interrupt routine.
