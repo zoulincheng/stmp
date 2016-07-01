@@ -47,5 +47,7 @@
 
 
 #define LED_SET(a)		a?(LED_PORT->ODR |= LED_PIN):(LED_PORT->ODR &= (uint8_t)(~LED_PIN))
+#define RF_SPINSEL(a)	a?(RF_NSEL_PORT->ODR |= RF_NSEL_PIN):(RF_NSEL_PORT->ODR &=(uint8_t)(~RF_NSEL_PIN))
+#define RF_SDN(a)		a?(RF_SDN_PORT->ODR |= RF_SDN_PIN):(RF_SDN_PORT->ODR &=(uint8_t)(~RF_SDN_PIN))
 
 #endif
