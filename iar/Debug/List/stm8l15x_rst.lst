@@ -1,0 +1,235 @@
+###############################################################################
+#                                                                             #
+# IAR C/C++ Compiler V1.42.1.142 for STM8               01/Jul/2016  17:30:49 #
+# Copyright 2010-2013 IAR Systems AB.                                         #
+#                                                                             #
+#    Source file  =  E:\hwpro-2016\20160627_L\stm8l15x_lib\src\stm8l15x_rst.c #
+#    Command line =  E:\hwpro-2016\20160627_L\stm8l15x_lib\src\stm8l15x_rst.c #
+#                     -e -Ol --no_cse --no_unroll --no_inline                 #
+#                    --no_code_motion --no_tbaa --no_cross_call --debug       #
+#                    --code_model medium --data_model medium -o               #
+#                    E:\hwpro-2016\20160627_L\iar\Debug\Obj\ --dlib_config    #
+#                    "C:\Program Files (x86)\IAR Systems\Embedded Workbench   #
+#                    6.5\stm8\LIB\dlstm8mmn.h" -D STM8L15X_MD -lC             #
+#                    E:\hwpro-2016\20160627_L\iar\Debug\List\ -I              #
+#                    E:\hwpro-2016\20160627_L\iar\..\stm8l15x_lib\inc\ -I     #
+#                    E:\hwpro-2016\20160627_L\iar\..\user\inc\ -I             #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\xprintf\ -I        #
+#                    E:\hwpro-2016\20160627_L\iar\..\drivers\ -I              #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\ -I                #
+#                    E:\hwpro-2016\20160627_L\iar\..\app\ --vregs 16          #
+#    List file    =  E:\hwpro-2016\20160627_L\iar\Debug\List\stm8l15x_rst.lst #
+#    Object file  =  E:\hwpro-2016\20160627_L\iar\Debug\Obj\stm8l15x_rst.o    #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+E:\hwpro-2016\20160627_L\stm8l15x_lib\src\stm8l15x_rst.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    stm8l15x_rst.c
+      4            * @author  MCD Application Team
+      5            * @version V1.6.1
+      6            * @date    30-September-2014
+      7            * @brief   This file provides firmware functions to manage the following 
+      8            *          functionalities of the RST peripheral:
+      9            *           - Flag management
+     10            *           - NRST Pin configuration
+     11            *
+     12            *  @verbatim
+     13            *               
+     14            *          ===================================================================
+     15            *                               RST specific features
+     16            *          ===================================================================
+     17            *
+     18            *           When a reset occurs, there is a reset phase from the external pin 
+     19            *           pull-down to the internal reset signal release. During this phase,
+     20            *           the microcontroller sets some hardware configurations before going
+     21            *           to the reset vector.
+     22            *           At the end of this phase, most of the registers are configured with
+     23            *           their “reset state” values. 
+     24            *           During the reset phase, some pin configurations may be different from
+     25            *           their “reset state” configuration.
+     26            *           
+     27            *           The NRST pin is an input and can be configured as open-drain output
+     28            *           using the RST_GPOutputEnable() function 
+     29            *
+     30            *  @endverbatim
+     31            *    
+     32            ******************************************************************************
+     33            * @attention
+     34            *
+     35            * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
+     36            *
+     37            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     38            * You may not use this file except in compliance with the License.
+     39            * You may obtain a copy of the License at:
+     40            *
+     41            *        http://www.st.com/software_license_agreement_liberty_v2
+     42            *
+     43            * Unless required by applicable law or agreed to in writing, software 
+     44            * distributed under the License is distributed on an "AS IS" BASIS, 
+     45            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     46            * See the License for the specific language governing permissions and
+     47            * limitations under the License.
+     48            *
+     49            ******************************************************************************  
+     50            */
+     51          
+     52          /* Includes ------------------------------------------------------------------*/
+     53          
+     54          #include "stm8l15x_rst.h"
+     55          
+     56          /** @addtogroup STM8L15x_StdPeriph_Driver
+     57            * @{
+     58            */
+     59          
+     60          /** @defgroup RST 
+     61            * @brief RST driver modules
+     62            * @{
+     63            */ 
+     64          /* Private define ------------------------------------------------------------*/
+     65          #define RST_CR_MASK  0xD0 /*!< Enable the GPIO */
+     66          /* Private macro -------------------------------------------------------------*/
+     67          /* Private variables ---------------------------------------------------------*/
+     68          /* Private function prototypes -----------------------------------------------*/
+     69          /* Private functions ---------------------------------------------------------*/
+     70          
+     71          /** @defgroup RST_Private_Functions
+     72            * @{
+     73            */
+     74          
+     75          /** @defgroup RST_Group1 Flag management functions
+     76           *  @brief   Flag management functions 
+     77           *
+     78          @verbatim   
+     79           ===============================================================================
+     80                                 Flag management functions
+     81           ===============================================================================  
+     82          
+     83          @endverbatim
+     84            * @{
+     85            */
+     86          
+     87          /**
+     88            * @brief   Checks whether the specified RST flag is set or not.
+     89            * @param   RST_Flag : specify the reset flag to check.
+     90            *          This parameter can be one of the following values:
+     91            *            @arg RST_FLAG_PORF: POR reset flag
+     92            *            @arg RST_FLAG_SWIMF: SWIM reset flag
+     93            *            @arg RST_FLAG_ILLOPF: Illegal opcode reset flag
+     94            *            @arg RST_FLAG_IWDGF: Independent watchdog reset flag 
+     95            *            @arg RST_FLAG_WWDGF: Window watchdog reset flag
+     96            *            @arg RST_FLAG_BORF: BOR reset flag
+     97            * @retval The new state of RST_Flag (SET or RESET).
+     98            */
+
+   \                                 In section .far_func.text, align 1
+     99          FlagStatus RST_GetFlagStatus(RST_FLAG_TypeDef RST_Flag)
+    100          {
+    101            /* Check the parameters */
+    102            assert_param(IS_RST_FLAG(RST_Flag));
+    103          
+    104            /* Get flag status */
+    105            return((FlagStatus)(((uint8_t)(RST->SR & RST_Flag) == (uint8_t)0x00) ? RESET : SET));
+   \                     RST_GetFlagStatus:
+   \   000000 C4 50B1      AND       A, L:0x50b1
+   \   000003 A1 00        CP        A, #0x0
+   \   000005 26 02        JRNE      L:??RST_GetFlagStatus_0
+   \   000007 4F           CLR       A
+   \   000008 87           RETF
+   \                     ??RST_GetFlagStatus_0:
+   \   000009 A6 01        LD        A, #0x1
+   \   00000B 87           RETF
+    106          }
+    107          
+    108          /**
+    109            * @brief  Clears the specified RST flag.
+    110            * @param   RST_Flag : specify the reset flag to check.
+    111            *          This parameter can be one of the following values:
+    112            *            @arg RST_FLAG_PORF: POR reset flag
+    113            *            @arg RST_FLAG_SWIMF: SWIM reset flag
+    114            *            @arg RST_FLAG_ILLOPF: Illegal opcode reset flag
+    115            *            @arg RST_FLAG_IWDGF: Independent watchdog reset flag 
+    116            *            @arg RST_FLAG_WWDGF: Window watchdog reset flag
+    117            *            @arg RST_FLAG_BORF: BOR reset flag
+    118            * @retval None
+    119            */
+
+   \                                 In section .far_func.text, align 1
+    120          void RST_ClearFlag(RST_FLAG_TypeDef RST_Flag)
+    121          {
+    122            /* Check the parameters */
+    123            assert_param(IS_RST_FLAG(RST_Flag));
+    124          
+    125            RST->SR = (uint8_t)RST_Flag;
+   \                     RST_ClearFlag:
+   \   000000 C7 50B1      LD        L:0x50b1, A
+    126          }
+   \   000003 87           RETF
+    127          
+    128          /**
+    129            * @}
+    130            */
+    131            
+    132          /** @defgroup RST_Group2 NRST Pin configuration function
+    133           *  @brief   NRST Pin configuration function 
+    134           *
+    135          @verbatim   
+    136           ===============================================================================
+    137                                NRST Pin configuration function
+    138           ===============================================================================  
+    139          
+    140          @endverbatim
+    141            * @{
+    142            */
+    143            
+    144          /**
+    145            * @brief  Configures the reset pad as GP output.
+    146            * @param  None
+    147            * @retval None
+    148            */
+
+   \                                 In section .far_func.text, align 1
+    149          void RST_GPOutputEnable(void)
+    150          {
+    151          
+    152            RST->CR = RST_CR_MASK;
+   \                     RST_GPOutputEnable:
+   \   000000 35 D0 50B0   MOV       L:0x50b0, #0xd0
+    153          }
+   \   000004 87           RETF
+    154          
+    155          /**
+    156            * @}
+    157            */
+    158          
+    159          /**
+    160            * @}
+    161            */
+    162            
+    163          /**
+    164            * @}
+    165            */
+    166          
+    167          /**
+    168            * @}
+    169            */
+    170          
+    171          /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  RST_ClearFlag
+       5  RST_GPOutputEnable
+      12  RST_GetFlagStatus
+
+ 
+ 21 bytes in section .far_func.text
+ 
+ 21 bytes of CODE memory
+
+Errors: none
+Warnings: none

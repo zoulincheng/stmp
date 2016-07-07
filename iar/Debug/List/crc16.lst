@@ -1,0 +1,218 @@
+###############################################################################
+#                                                                             #
+# IAR C/C++ Compiler V1.42.1.142 for STM8               01/Jul/2016  17:30:45 #
+# Copyright 2010-2013 IAR Systems AB.                                         #
+#                                                                             #
+#    Source file  =  E:\hwpro-2016\20160627_L\utils\lib\crc16.c               #
+#    Command line =  E:\hwpro-2016\20160627_L\utils\lib\crc16.c -e -Ol        #
+#                    --no_cse --no_unroll --no_inline --no_code_motion        #
+#                    --no_tbaa --no_cross_call --debug --code_model medium    #
+#                    --data_model medium -o E:\hwpro-2016\20160627_L\iar\Debu #
+#                    g\Obj\ --dlib_config "C:\Program Files (x86)\IAR         #
+#                    Systems\Embedded Workbench 6.5\stm8\LIB\dlstm8mmn.h" -D  #
+#                    STM8L15X_MD -lC E:\hwpro-2016\20160627_L\iar\Debug\List\ #
+#                     -I E:\hwpro-2016\20160627_L\iar\..\stm8l15x_lib\inc\    #
+#                    -I E:\hwpro-2016\20160627_L\iar\..\user\inc\ -I          #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\xprintf\ -I        #
+#                    E:\hwpro-2016\20160627_L\iar\..\drivers\ -I              #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\ -I                #
+#                    E:\hwpro-2016\20160627_L\iar\..\app\ --vregs 16          #
+#    List file    =  E:\hwpro-2016\20160627_L\iar\Debug\List\crc16.lst        #
+#    Object file  =  E:\hwpro-2016\20160627_L\iar\Debug\Obj\crc16.o           #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+E:\hwpro-2016\20160627_L\utils\lib\crc16.c
+      1          /*
+      2           * Copyright (c) 2005, Swedish Institute of Computer Science
+      3           * All rights reserved.
+      4           *
+      5           * Redistribution and use in source and binary forms, with or without
+      6           * modification, are permitted provided that the following conditions
+      7           * are met:
+      8           * 1. Redistributions of source code must retain the above copyright
+      9           *    notice, this list of conditions and the following disclaimer.
+     10           * 2. Redistributions in binary form must reproduce the above copyright
+     11           *    notice, this list of conditions and the following disclaimer in the
+     12           *    documentation and/or other materials provided with the distribution.
+     13           * 3. Neither the name of the Institute nor the names of its contributors
+     14           *    may be used to endorse or promote products derived from this software
+     15           *    without specific prior written permission.
+     16           *
+     17           * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+     18           * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+     19           * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+     20           * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+     21           * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+     22           * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+     23           * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+     24           * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+     25           * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+     26           * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+     27           * SUCH DAMAGE.
+     28           *
+     29           * This file is part of the Contiki operating system.
+     30           *
+     31           */
+     32          
+     33          /** \addtogroup crc16
+     34           * @{ */
+     35          
+     36          /**
+     37           * \file
+     38           *         Implementation of the CRC16 calculcation
+     39           * \author
+     40           *         Adam Dunkels <adam@sics.se>
+     41           *
+     42           */
+     43          
+     44          /* CITT CRC16 polynomial ^16 + ^12 + ^5 + 1 */
+     45          /*---------------------------------------------------------------------------*/
+
+   \                                 In section .far_func.text, align 1
+     46          unsigned short
+     47          crc16_add(unsigned char b, unsigned short acc)
+     48          {
+   \                     crc16_add:
+   \   000000 9093         LDW       Y, X
+     49            /*
+     50              acc  = (unsigned char)(acc >> 8) | (acc << 8);
+     51              acc ^= b;
+     52              acc ^= (unsigned char)(acc & 0xff) >> 4;
+     53              acc ^= (acc << 8) << 4;
+     54              acc ^= ((acc & 0xff) << 4) << 1;
+     55            */
+     56          
+     57            acc ^= b;
+   \   000002 5F           CLRW      X
+   \   000003 97           LD        XL, A
+   \   000004 BF ..        LDW       S:?w0, X
+   \   000006 51           EXGW      X, Y
+   \   000007 01           RRWA      X, A
+   \   000008 B8 ..        XOR       A, S:?b1
+   \   00000A 01           RRWA      X, A
+   \   00000B B8 ..        XOR       A, S:?b0
+   \   00000D 01           RRWA      X, A
+   \   00000E 51           EXGW      X, Y
+     58            acc  = (acc >> 8) | (acc << 8);
+   \   00000F 93           LDW       X, Y
+   \   000010 4F           CLR       A
+   \   000011 02           RLWA      X, A
+   \   000012 BF ..        LDW       S:?w0, X
+   \   000014 93           LDW       X, Y
+   \   000015 4F           CLR       A
+   \   000016 01           RRWA      X, A
+   \   000017 01           RRWA      X, A
+   \   000018 BA ..        OR        A, S:?b1
+   \   00001A 01           RRWA      X, A
+   \   00001B BA ..        OR        A, S:?b0
+   \   00001D 01           RRWA      X, A
+   \   00001E 9093         LDW       Y, X
+     59            acc ^= (acc & 0xff00) << 4;
+   \   000020 93           LDW       X, Y
+   \   000021 02           RLWA      X, A
+   \   000022 A4 FF        AND       A, #0xff
+   \   000024 02           RLWA      X, A
+   \   000025 A4 00        AND       A, #0x0
+   \   000027 02           RLWA      X, A
+   \   000028 58           SLLW      X
+   \   000029 58           SLLW      X
+   \   00002A 58           SLLW      X
+   \   00002B 58           SLLW      X
+   \   00002C BF ..        LDW       S:?w0, X
+   \   00002E 51           EXGW      X, Y
+   \   00002F 01           RRWA      X, A
+   \   000030 B8 ..        XOR       A, S:?b1
+   \   000032 01           RRWA      X, A
+   \   000033 B8 ..        XOR       A, S:?b0
+   \   000035 01           RRWA      X, A
+   \   000036 51           EXGW      X, Y
+     60            acc ^= (acc >> 8) >> 4;
+   \   000037 93           LDW       X, Y
+   \   000038 8D ......    CALLF     L:?srl16_x_x_12
+   \   00003C BF ..        LDW       S:?w0, X
+   \   00003E 51           EXGW      X, Y
+   \   00003F 01           RRWA      X, A
+   \   000040 B8 ..        XOR       A, S:?b1
+   \   000042 01           RRWA      X, A
+   \   000043 B8 ..        XOR       A, S:?b0
+   \   000045 01           RRWA      X, A
+   \   000046 51           EXGW      X, Y
+     61            acc ^= (acc & 0xff00) >> 5;
+   \   000047 93           LDW       X, Y
+   \   000048 8D ......    CALLF     L:?srl16_x_x_5
+   \   00004C 02           RLWA      X, A
+   \   00004D A4 07        AND       A, #0x7
+   \   00004F 02           RLWA      X, A
+   \   000050 A4 F8        AND       A, #0xf8
+   \   000052 02           RLWA      X, A
+   \   000053 BF ..        LDW       S:?w0, X
+   \   000055 51           EXGW      X, Y
+   \   000056 01           RRWA      X, A
+   \   000057 B8 ..        XOR       A, S:?b1
+   \   000059 01           RRWA      X, A
+   \   00005A B8 ..        XOR       A, S:?b0
+   \   00005C 01           RRWA      X, A
+   \   00005D 51           EXGW      X, Y
+     62            return acc;
+   \   00005E 93           LDW       X, Y
+   \   00005F 87           RETF
+     63          }
+     64          /*---------------------------------------------------------------------------*/
+
+   \                                 In section .far_func.text, align 1
+     65          unsigned short
+     66          crc16_data(const unsigned char *data, int len, unsigned short acc)
+     67          {
+   \                     crc16_data:
+   \   000000 8D ......    CALLF     L:?push_l2
+   \   000004 8D ......    CALLF     L:?push_w6
+   \   000008 BF ..        LDW       S:?w5, X
+   \   00000A 90BF ..      LDW       S:?w6, Y
+     68            int i;
+     69            
+     70            for(i = 0; i < len; ++i) {
+   \   00000D 3F ..        CLR       S:?b9
+   \   00000F 3F ..        CLR       S:?b8
+   \   000011 20 15        JRA       L:??crc16_data_0
+     71              acc = crc16_add(*data, acc);
+   \                     ??crc16_data_1:
+   \   000013 BE ..        LDW       X, S:?w0
+   \   000015 92C6 ..      LD        A, [S:?w5.w]
+   \   000018 8D ......    CALLF     crc16_add
+   \   00001C BF ..        LDW       S:?w0, X
+     72              ++data;
+   \   00001E BE ..        LDW       X, S:?w5
+   \   000020 5C           INCW      X
+   \   000021 BF ..        LDW       S:?w5, X
+     73            }
+   \   000023 BE ..        LDW       X, S:?w4
+   \   000025 5C           INCW      X
+   \   000026 BF ..        LDW       S:?w4, X
+   \                     ??crc16_data_0:
+   \   000028 BE ..        LDW       X, S:?w4
+   \   00002A B3 ..        CPW       X, S:?w6
+   \   00002C 2F E5        JRSLT     L:??crc16_data_1
+     74            return acc;
+   \   00002E BE ..        LDW       X, S:?w0
+   \   000030 AC ......    JPF       L:?epilogue_l2_w6
+     75          }
+     76          /*---------------------------------------------------------------------------*/
+     77          
+     78          /** @} */
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      96  crc16_add
+      52  crc16_data
+
+ 
+ 148 bytes in section .far_func.text
+ 
+ 148 bytes of CODE memory
+
+Errors: none
+Warnings: none

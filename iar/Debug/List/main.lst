@@ -1,0 +1,197 @@
+###############################################################################
+#                                                                             #
+# IAR C/C++ Compiler V1.42.1.142 for STM8               01/Jul/2016  17:36:13 #
+# Copyright 2010-2013 IAR Systems AB.                                         #
+#                                                                             #
+#    Source file  =  E:\hwpro-2016\20160627_L\user\src\main.c                 #
+#    Command line =  E:\hwpro-2016\20160627_L\user\src\main.c -e -Ol          #
+#                    --no_cse --no_unroll --no_inline --no_code_motion        #
+#                    --no_tbaa --no_cross_call --debug --code_model medium    #
+#                    --data_model medium -o E:\hwpro-2016\20160627_L\iar\Debu #
+#                    g\Obj\ --dlib_config "C:\Program Files (x86)\IAR         #
+#                    Systems\Embedded Workbench 6.5\stm8\LIB\dlstm8mmn.h" -D  #
+#                    STM8L15X_MD -lC E:\hwpro-2016\20160627_L\iar\Debug\List\ #
+#                     -I E:\hwpro-2016\20160627_L\iar\..\stm8l15x_lib\inc\    #
+#                    -I E:\hwpro-2016\20160627_L\iar\..\user\inc\ -I          #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\xprintf\ -I        #
+#                    E:\hwpro-2016\20160627_L\iar\..\drivers\ -I              #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\ -I                #
+#                    E:\hwpro-2016\20160627_L\iar\..\app\ --vregs 16          #
+#    List file    =  E:\hwpro-2016\20160627_L\iar\Debug\List\main.lst         #
+#    Object file  =  E:\hwpro-2016\20160627_L\iar\Debug\Obj\main.o            #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+E:\hwpro-2016\20160627_L\user\src\main.c
+      1          
+      2          /* Includes ------------------------------------------------------------------*/
+      3          #include "stm8l15x.h"
+      4          #include "board_init.h"
+      5          #include "debugUart.h"
+      6          #include "sysprintf.h"
+      7          #include "boardiodef.h"
+      8          #include "basictype.h"
+
+  typedef unsigned char 	  uint8_t;
+                        	  ^
+"E:\hwpro-2016\20160627_L\user\inc\basictype.h",8  Warning[Pe301]: typedef
+          name has already been declared (with same type)
+
+  typedef unsigned short	  uint16_t;
+                        	  ^
+"E:\hwpro-2016\20160627_L\user\inc\basictype.h",10  Warning[Pe301]: typedef
+          name has already been declared (with same type)
+
+  typedef unsigned char     u8;
+                            ^
+"E:\hwpro-2016\20160627_L\user\inc\basictype.h",16  Warning[Pe301]: typedef
+          name has already been declared (with same type)
+
+  typedef unsigned short    u16;
+                            ^
+"E:\hwpro-2016\20160627_L\user\inc\basictype.h",17  Warning[Pe301]: typedef
+          name has already been declared (with same type)
+      9          #include "rtc.h"
+     10          
+     11          /**
+     12            * @brief  Inserts a delay time.
+     13            * @param  nCount: specifies the delay time length.
+     14            * @retval None
+     15            */
+
+   \                                 In section .far_func.text, align 1
+     16          void delay(uint16_t nCount)
+     17          {
+   \                     delay:
+   \   000000 20 01        JRA       L:??delay_0
+     18          	/* Decrement nCount value */
+     19          	while (nCount != 0)
+     20          	{
+     21          		nCount--;
+   \                     ??delay_1:
+   \   000002 5A           DECW      X
+     22          	}
+   \                     ??delay_0:
+   \   000003 5D           TNZW      X
+   \   000004 26 FC        JRNE      L:??delay_1
+     23          }
+   \   000006 87           RETF
+     24          
+     25          
+     26          /**
+     27            * @brief  Main program.
+     28            * @param  None
+     29            * @retval None
+     30            */
+
+   \                                 In section .far_func.text, align 1
+     31          void main(void)
+     32          {
+     33          	boardClkInit( );
+   \                     main:
+   \   000000 8D ......    CALLF     boardClkInit
+     34          	debugUartInit( );
+   \   000004 8D ......    CALLF     debugUartInit
+     35          	si446xRadioInit( );
+                 	^
+Warning[Pe223]: function "si446xRadioInit" declared implicitly
+   \   000008 8D ......    CALLF     si446xRadioInit
+     36          	rtcInit( );
+   \   00000C 8D ......    CALLF     rtcInit
+     37          	rtcOn(MS2ST(500));
+   \   000010 AE 0252      LDW       X, #0x252
+   \   000013 8D ......    CALLF     rtcOn
+     38          	enableInterrupts( );
+   \   000017 9A           RIM
+     39          	while (1)
+     40          	{
+     41          		delay(0xffff);
+   \                     ??main_0:
+   \   000018 5F           CLRW      X
+   \   000019 5A           DECW      X
+   \   00001A 8D ......    CALLF     delay
+     42          		delay(0xffff);
+   \   00001E 5F           CLRW      X
+   \   00001F 5A           DECW      X
+   \   000020 8D ......    CALLF     delay
+     43          		delay(0xffff);
+   \   000024 5F           CLRW      X
+   \   000025 5A           DECW      X
+   \   000026 8D ......    CALLF     delay
+     44          		delay(0xffff);
+   \   00002A 5F           CLRW      X
+   \   00002B 5A           DECW      X
+   \   00002C 8D ......    CALLF     delay
+     45          		LED_SET(1);
+   \   000030 C6 500F      LD        A, L:0x500f
+   \   000033 AA 02        OR        A, #0x2
+   \   000035 C7 500F      LD        L:0x500f, A
+   \   000038 5F           CLRW      X
+   \   000039 97           LD        XL, A
+     46          		//XPRINTF((0, "%ld\r\n", 12345678));
+     47          		//SI446X_PART_INFO(NULL);
+     48          		delay(0xffff);
+   \   00003A 5F           CLRW      X
+   \   00003B 5A           DECW      X
+   \   00003C 8D ......    CALLF     delay
+     49          		delay(0xffff);
+   \   000040 5F           CLRW      X
+   \   000041 5A           DECW      X
+   \   000042 8D ......    CALLF     delay
+     50          		delay(0xffff);
+   \   000046 5F           CLRW      X
+   \   000047 5A           DECW      X
+   \   000048 8D ......    CALLF     delay
+     51          		delay(0xffff);
+   \   00004C 5F           CLRW      X
+   \   00004D 5A           DECW      X
+   \   00004E 8D ......    CALLF     delay
+     52          		LED_SET(0);
+   \   000052 C6 500F      LD        A, L:0x500f
+   \   000055 A4 FD        AND       A, #0xfd
+   \   000057 C7 500F      LD        L:0x500f, A
+   \   00005A 5F           CLRW      X
+   \   00005B 97           LD        XL, A
+   \   00005C 20 BA        JRA       L:??main_0
+     53          		//XPRINTF((0, "sys2\r\n"));
+     54          	}
+     55          }
+     56          
+     57          
+     58          
+     59          
+     60          #ifdef  USE_FULL_ASSERT
+     61          
+     62          /**
+     63            * @brief  Reports the name of the source file and the source line number
+     64            *   where the assert_param error has occurred.
+     65            * @param  file: pointer to the source file name
+     66            * @param  line: assert_param error line source number
+     67            * @retval None
+     68            */
+     69          void assert_failed(uint8_t* file, uint32_t line)
+     70          {
+     71          	while (1)
+     72          	{
+     73          	}
+     74          }
+     75          #endif
+     76          
+     77          
+     78          /******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       7  delay
+      94  main
+
+ 
+ 101 bytes in section .far_func.text
+ 
+ 101 bytes of CODE memory
+
+Errors: none
+Warnings: 5

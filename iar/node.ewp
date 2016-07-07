@@ -253,6 +253,7 @@
           <state>$PROJ_DIR$\..\utils\xprintf</state>
           <state>$PROJ_DIR$\..\drivers</state>
           <state>$PROJ_DIR$\..\utils</state>
+          <state>$PROJ_DIR$\..\app</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1572,6 +1573,15 @@
       <data/>
     </settings>
   </configuration>
+  <group>
+    <name>app</name>
+    <file>
+      <name>$PROJ_DIR$\..\app\chain.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\app\events.c</name>
+    </file>
+  </group>
   <group>
     <name>driver</name>
     <file>

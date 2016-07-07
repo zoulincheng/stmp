@@ -1,1 +1,2 @@
----- SI446X_PART_INFO Matches (0 in 0 files) ----
+---- SI446X_ACK_154_LEN Matches (1 in 1 files) ----
+si446x_rf.c (si4438\radiolib):#define SI446X_ACK_154_LEN		11

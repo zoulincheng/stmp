@@ -1,0 +1,1358 @@
+###############################################################################
+#                                                                             #
+# IAR C/C++ Compiler V1.42.1.142 for STM8               01/Jul/2016  17:30:47 #
+# Copyright 2010-2013 IAR Systems AB.                                         #
+#                                                                             #
+#    Source file  =  E:\hwpro-2016\20160627_L\stm8l15x_lib\src\stm8l15x_dac.c #
+#    Command line =  E:\hwpro-2016\20160627_L\stm8l15x_lib\src\stm8l15x_dac.c #
+#                     -e -Ol --no_cse --no_unroll --no_inline                 #
+#                    --no_code_motion --no_tbaa --no_cross_call --debug       #
+#                    --code_model medium --data_model medium -o               #
+#                    E:\hwpro-2016\20160627_L\iar\Debug\Obj\ --dlib_config    #
+#                    "C:\Program Files (x86)\IAR Systems\Embedded Workbench   #
+#                    6.5\stm8\LIB\dlstm8mmn.h" -D STM8L15X_MD -lC             #
+#                    E:\hwpro-2016\20160627_L\iar\Debug\List\ -I              #
+#                    E:\hwpro-2016\20160627_L\iar\..\stm8l15x_lib\inc\ -I     #
+#                    E:\hwpro-2016\20160627_L\iar\..\user\inc\ -I             #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\xprintf\ -I        #
+#                    E:\hwpro-2016\20160627_L\iar\..\drivers\ -I              #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\ -I                #
+#                    E:\hwpro-2016\20160627_L\iar\..\app\ --vregs 16          #
+#    List file    =  E:\hwpro-2016\20160627_L\iar\Debug\List\stm8l15x_dac.lst #
+#    Object file  =  E:\hwpro-2016\20160627_L\iar\Debug\Obj\stm8l15x_dac.o    #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+E:\hwpro-2016\20160627_L\stm8l15x_lib\src\stm8l15x_dac.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    stm8l15x_dac.c
+      4            * @author  MCD Application Team
+      5            * @version V1.6.1
+      6            * @date    30-September-2014
+      7            * @brief   This file provides firmware functions to manage the following 
+      8            *          functionalities of the Digital-to-Analog Converter (DAC) peripheral: 
+      9            *           - DAC channels configuration: trigger, output buffer, data format
+     10            *           - DMA management      
+     11            *           - Interrupts and flags management
+     12            *
+     13            *  @verbatim
+     14            *    
+     15            *          ===================================================================
+     16            *                             DAC Peripheral features
+     17            *          ===================================================================
+     18            *          The device integrates two 12-bit Digital Analog Converters that can 
+     19            *          be used independently or simultaneously (dual mode):
+     20            *            1- DAC channel1 with DAC_OUT1 (PF0) as output
+     21            *            1- DAC channel2 with DAC_OUT2 (PF1) as output
+     22            *
+     23            *          Digital to Analog conversion can be non-triggered using DAC_Trigger_None
+     24            *          and DAC_OUT1/DAC_OUT2 is available once writing to DHRx register using 
+     25            *          DAC_SetChannel1Data()/DAC_SetChannel2Data.
+     26            *   
+     27            *         Digital to Analog conversion can be triggered by:
+     28            *             1- External event: PE4 using DAC_Trigger_Ext.
+     29            *                This pin (PE4) must be configured in input mode.
+     30            *
+     31            *             2- Timers TRGO: TIM4, TIM5 
+     32            *                (DAC_Trigger_T4_TRGO, DAC_Trigger_T5_TRGO)
+     33            *                The timer TRGO event should be selected using TIMx_SelectOutputTrigger()
+     34            *
+     35            *             3- Software using DAC_Trigger_Software
+     36            *
+     37            *          Each DAC channel integrates an output buffer that can be used to 
+     38            *          reduce the output impedance, and to drive external loads directly
+     39            *          without having to add an external operational amplifier.
+     40            *          
+     41            *          Refer to the device datasheet for more details about output impedance
+     42            *          value with and without output buffer.
+     43            *
+     44            *          Both DAC channels can be used to generate
+     45            *             1- Noise wave using DAC_Wave_Noise
+     46            *             2- Triangle wave using DAC_Wave_Triangle
+     47            *        
+     48            *
+     49            *          The DAC data format can be:
+     50            *             1- 8-bit right alignment using DAC_Align_8b_R
+     51            *             2- 12-bit left alignment using DAC_Align_12b_L
+     52            *             3- 12-bit right alignment using DAC_Align_12b_R
+     53            *
+     54            *          The analog output voltage on each DAC channel pin is determined
+     55            *          by the following equation: DAC_OUTx = VREF+ * DOR / 4095
+     56            *             with  DOR is the Data Output Register
+     57            *                   VEF+ is the input voltage reference (refer to the device datasheet)
+     58            *          e.g. To set DAC_OUT1 to 0.7V, use
+     59            *            DAC_SetChannel1Data(DAC_Align_12b_R, 868);
+     60            *          Assuming that VREF+ = 3.3, DAC_OUT1 = (3.3 * 868) / 4095 = 0.7V
+     61            *
+     62            *          A DMA1 request can be generated when an external trigger (but not
+     63            *          a software trigger) occurs if DMA1 requests are enabled using
+     64            *          DAC_DMACmd()
+     65            *          DMA1 requests are mapped as following:
+     66            *             1- DAC channel1 is mapped on DMA1 channel3 which must be already 
+     67            *                configured
+     68            *             2- DAC channel2 is mapped on DMA1 channel1 which must be already 
+     69            *                configured
+     70            *
+     71            *          ===================================================================      
+     72            *                              How to use this driver 
+     73            *          ===================================================================          
+     74            *            - DAC clock must be enabled to get write access to DAC registers using
+     75            *              CLK_PeripheralClockConfig(CLK_Peripheral_DAC, ENABLE)
+     76            *            - Configure DAC_OUTx (DAC_OUT1: PF0, DAC_OUT2: PF1) in analog mode.
+     77            *            - Configure the DAC channel using DAC_Init()
+     78            *            - Enable the DAC channel using DAC_Cmd()
+     79            * 
+     80            *  @endverbatim
+     81            *    
+     82            ******************************************************************************
+     83            * @attention
+     84            *
+     85            * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
+     86            *
+     87            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+     88            * You may not use this file except in compliance with the License.
+     89            * You may obtain a copy of the License at:
+     90            *
+     91            *        http://www.st.com/software_license_agreement_liberty_v2
+     92            *
+     93            * Unless required by applicable law or agreed to in writing, software 
+     94            * distributed under the License is distributed on an "AS IS" BASIS, 
+     95            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     96            * See the License for the specific language governing permissions and
+     97            * limitations under the License.
+     98            *
+     99            ******************************************************************************
+    100            */
+    101          
+    102          /* Includes ------------------------------------------------------------------*/
+    103          #include "stm8l15x_dac.h"
+    104          
+    105          /** @addtogroup STM8L15x_StdPeriph_Driver
+    106            * @{
+    107            */
+    108          
+    109          /** @defgroup DAC 
+    110            * @brief DAC driver modules
+    111            * @{
+    112            */ 
+    113            
+    114          /* Private typedef -----------------------------------------------------------*/
+    115          /* Private define ------------------------------------------------------------*/
+    116          /* Private macro -------------------------------------------------------------*/
+    117          /* Private variables ---------------------------------------------------------*/
+    118          /* Private function prototypes -----------------------------------------------*/
+    119          /* Private functions ---------------------------------------------------------*/
+    120          
+    121          /** @defgroup DAC_Private_Functions
+    122            * @{
+    123            */ 
+    124          
+    125          /** @defgroup DAC_Group1 DAC channels configuration
+    126           *  @brief   DAC channels configuration: trigger, output buffer, data format 
+    127           *
+    128          @verbatim   
+    129           ===============================================================================
+    130                    DAC channels configuration: trigger, output buffer, data format
+    131           ===============================================================================  
+    132          
+    133          @endverbatim
+    134            * @{
+    135            */
+    136          
+    137          /**
+    138            * @brief  Deinitializes the DAC peripheral registers to their default reset values.
+    139            * @param  None
+    140            * @retval None
+    141            */
+
+   \                                 In section .far_func.text, align 1
+    142          void DAC_DeInit(void)
+    143          {
+    144            /*  Set Channel1  the Configuration registers to their reset values */
+    145            DAC->CH1CR1 = DAC_CR1_RESET_VALUE;
+   \                     DAC_DeInit:
+   \   000000 35 00 5380   MOV       L:0x5380, #0x0
+    146            DAC->CH1CR2 = DAC_CR2_RESET_VALUE;
+   \   000004 35 00 5381   MOV       L:0x5381, #0x0
+    147          
+    148            /*  Set Channel2  the Configuration registers to their reset values */
+    149            DAC->CH2CR1 = DAC_CR1_RESET_VALUE;
+   \   000008 35 00 5382   MOV       L:0x5382, #0x0
+    150            DAC->CH2CR2 = DAC_CR2_RESET_VALUE;
+   \   00000C 35 00 5383   MOV       L:0x5383, #0x0
+    151          
+    152            /*  Set the Software Trigger configuration registers to their reset values */
+    153            DAC->SWTRIGR = DAC_SWTRIGR_RESET_VALUE;
+   \   000010 35 00 5384   MOV       L:0x5384, #0x0
+    154          
+    155            /*  Set the Status registers to their reset values */
+    156            DAC->SR = (uint8_t)~DAC_SR_RESET_VALUE;
+   \   000014 35 FF 5385   MOV       L:0x5385, #0xff
+    157          
+    158            /*  Set the Channel1 Data holding registers to their reset values */
+    159            DAC->CH1RDHRH = DAC_RDHRH_RESET_VALUE;
+   \   000018 35 00 5388   MOV       L:0x5388, #0x0
+    160            DAC->CH1RDHRL = DAC_RDHRL_RESET_VALUE;
+   \   00001C 35 00 5389   MOV       L:0x5389, #0x0
+    161            DAC->CH1LDHRH = DAC_LDHRH_RESET_VALUE;
+   \   000020 35 00 538C   MOV       L:0x538c, #0x0
+    162            DAC->CH1LDHRL = DAC_LDHRL_RESET_VALUE;
+   \   000024 35 00 538D   MOV       L:0x538d, #0x0
+    163            DAC->CH1DHR8 = DAC_DHR8_RESET_VALUE;
+   \   000028 35 00 5390   MOV       L:0x5390, #0x0
+    164          
+    165            /*  Set the Channel2 Data holding registers to their reset values */
+    166            DAC->CH2RDHRH = DAC_RDHRH_RESET_VALUE;
+   \   00002C 35 00 5394   MOV       L:0x5394, #0x0
+    167            DAC->CH2RDHRL = DAC_RDHRL_RESET_VALUE;
+   \   000030 35 00 5395   MOV       L:0x5395, #0x0
+    168            DAC->CH2LDHRH = DAC_LDHRH_RESET_VALUE;
+   \   000034 35 00 5398   MOV       L:0x5398, #0x0
+    169            DAC->CH2LDHRL = DAC_LDHRL_RESET_VALUE;
+   \   000038 35 00 5399   MOV       L:0x5399, #0x0
+    170            DAC->CH2DHR8 = DAC_DHR8_RESET_VALUE;
+   \   00003C 35 00 539C   MOV       L:0x539c, #0x0
+    171          
+    172            /*  Set the Dual mode 12bit Right Data holding registers to their reset values */
+    173            DAC->DCH1RDHRH = DAC_RDHRH_RESET_VALUE;
+   \   000040 35 00 53A0   MOV       L:0x53a0, #0x0
+    174            DAC->DCH1RDHRL = DAC_RDHRL_RESET_VALUE;
+   \   000044 35 00 53A1   MOV       L:0x53a1, #0x0
+    175            DAC->DCH2RDHRH = DAC_RDHRH_RESET_VALUE;
+   \   000048 35 00 53A2   MOV       L:0x53a2, #0x0
+    176            DAC->DCH2RDHRL = DAC_RDHRL_RESET_VALUE;
+   \   00004C 35 00 53A3   MOV       L:0x53a3, #0x0
+    177          
+    178            /*  Set the Dual mode 12bit Left Data holding registers to their reset values */
+    179            DAC->DCH1LDHRH = DAC_LDHRH_RESET_VALUE;
+   \   000050 35 00 53A4   MOV       L:0x53a4, #0x0
+    180            DAC->DCH1LDHRL = DAC_LDHRL_RESET_VALUE;
+   \   000054 35 00 53A5   MOV       L:0x53a5, #0x0
+    181            DAC->DCH2LDHRH = DAC_LDHRH_RESET_VALUE;
+   \   000058 35 00 53A6   MOV       L:0x53a6, #0x0
+    182            DAC->DCH2LDHRL = DAC_LDHRL_RESET_VALUE;
+   \   00005C 35 00 53A7   MOV       L:0x53a7, #0x0
+    183          
+    184            /*  Set the Dual mode 8bit Data holding registers to their reset values */
+    185            DAC->DCH1DHR8 = DAC_DHR8_RESET_VALUE;
+   \   000060 35 00 53A8   MOV       L:0x53a8, #0x0
+    186            DAC->DCH2DHR8 = DAC_DHR8_RESET_VALUE;
+   \   000064 35 00 53A9   MOV       L:0x53a9, #0x0
+    187          }
+   \   000068 87           RETF
+    188          
+    189          /**
+    190            * @brief  Initializes the DAC according to the specified parameters.
+    191            * @param  DAC_Channel: the selected DAC channel. 
+    192            *          This parameter can be one of the following values:
+    193            *            @arg DAC_Channel_1: DAC Channel1 selected
+    194            *            @arg DAC_Channel_2: DAC Channel2 selected
+    195            * @param  DAC_Trigger : the selected DAC trigger. 
+    196            *          This parameter can be one of the following values:
+    197            *            @arg DAC_Trigger_None: DAC trigger None 
+    198            *            @arg DAC_Trigger_T4_TRGO: DAC trigger TIM4 TRGO
+    199            *            @arg DAC_Trigger_T5_TRGO: DAC trigger TIM5 TRGO
+    200            *            @arg DAC_Trigger_Ext: DAC trigger External Trigger (PE4)  
+    201            *            @arg DAC_Trigger_Software: DAC trigger software 
+    202            * @param  DAC_OutputBuffer : the status of DAC load Buffer
+    203            *          This parameter can be one of the following values:
+    204            *            @arg DAC_OutputBuffer_Enable: DAC output buffer Enabled
+    205            *            @arg DAC_OutputBuffer_Disable: DAC output buffer Disabled  
+    206            * @retval None
+    207            */
+
+   \                                 In section .far_func.text, align 1
+    208          void DAC_Init(DAC_Channel_TypeDef DAC_Channel,
+    209                        DAC_Trigger_TypeDef DAC_Trigger,
+    210                        DAC_OutputBuffer_TypeDef DAC_OutputBuffer)
+    211          {
+    212            uint8_t tmpreg = 0;
+   \                     DAC_Init:
+   \   000000 3F ..        CLR       S:?b2
+    213            uint16_t tmpreg2 = 0;
+   \   000002 5F           CLRW      X
+    214          
+    215            /* Check the DAC parameters */
+    216            assert_param(IS_DAC_CHANNEL(DAC_Channel));
+    217            assert_param(IS_DAC_TRIGGER(DAC_Trigger));
+    218            assert_param(IS_DAC_OUTPUT_BUFFER_STATE(DAC_OutputBuffer));
+    219          
+    220            /* Get the DAC CHxCR1 value */
+    221            tmpreg2 =  (uint16_t)((uint8_t)((uint8_t)DAC_Channel << 1));
+   \   000003 48           SLL       A
+   \   000004 905F         CLRW      Y
+   \   000006 9097         LD        YL, A
+   \   000008 93           LDW       X, Y
+    222            tmpreg = *(uint8_t*)((uint16_t)(DAC_BASE + CR1_Offset + tmpreg2));
+   \   000009 9093         LDW       Y, X
+   \   00000B 72A9 5380    ADDW      Y, #0x5380
+   \   00000F 90F6         LD        A, (Y)
+   \   000011 B7 ..        LD        S:?b2, A
+    223          
+    224            /* Clear BOFFx, TENx, TSELx bits */
+    225            tmpreg &= (uint8_t)~(DAC_CR1_BOFF | DAC_CR1_TEN | DAC_CR1_TSEL );
+   \   000013 B6 ..        LD        A, S:?b2
+   \   000015 A4 C1        AND       A, #0xc1
+   \   000017 B7 ..        LD        S:?b2, A
+    226          
+    227            /* Set BOFFx bit according to DAC_OutputBuffer value */
+    228            tmpreg |= (uint8_t)(DAC_OutputBuffer);
+   \   000019 B6 ..        LD        A, S:?b1
+   \   00001B BA ..        OR        A, S:?b2
+   \   00001D B7 ..        LD        S:?b2, A
+    229          
+    230          
+    231            /* Configure for the selected DAC channel trigger*/
+    232            if (DAC_Trigger != DAC_Trigger_None)
+   \   00001F B6 ..        LD        A, S:?b0
+   \   000021 A1 30        CP        A, #0x30
+   \   000023 27 08        JREQ      L:??DAC_Init_0
+    233            {
+    234              /* Set TSELx and TEN  bits according to DAC_Trigger value */
+    235              tmpreg |= (uint8_t)(DAC_CR1_TEN | DAC_Trigger) ;
+   \   000025 B6 ..        LD        A, S:?b0
+   \   000027 AA 04        OR        A, #0x4
+   \   000029 BA ..        OR        A, S:?b2
+   \   00002B B7 ..        LD        S:?b2, A
+    236            }
+    237          
+    238            /* Write to DAC CHxCR1 */
+    239            *(uint8_t*)((uint16_t)(DAC_BASE + CR1_Offset + tmpreg2)) = (uint8_t)tmpreg;
+   \                     ??DAC_Init_0:
+   \   00002D 1C 5380      ADDW      X, #0x5380
+   \   000030 B6 ..        LD        A, S:?b2
+   \   000032 F7           LD        (X), A
+    240          }
+   \   000033 87           RETF
+    241          
+    242          /**
+    243            * @brief  Enables or disables the specified DAC channel.
+    244            * @param  DAC_Channel: the selected DAC channel. 
+    245            *          This parameter can be one of the following values:
+    246            *            @arg DAC_Channel_1: DAC Channel1 selected
+    247            *            @arg DAC_Channel_2: DAC Channel2 selected
+    248            * @param  NewState: new state of the DAC channel. 
+    249            *      This parameter can be: ENABLE or DISABLE.
+    250            * @note When the DAC channel is enabled the trigger source can no more
+    251            *       be modified.
+    252            * @retval None
+    253            */
+
+   \                                 In section .far_func.text, align 1
+    254          void DAC_Cmd(DAC_Channel_TypeDef DAC_Channel, FunctionalState NewState)
+    255          {
+    256            uint16_t cr1addr = 0;
+   \                     DAC_Cmd:
+   \   000000 5F           CLRW      X
+    257            /* Check the parameters */
+    258            assert_param(IS_DAC_CHANNEL(DAC_Channel));
+    259            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    260          
+    261            /* Find CHxCR1 register Address */
+    262            cr1addr = DAC_BASE + CR1_Offset + (uint8_t)((uint8_t)DAC_Channel << 1);
+   \   000001 48           SLL       A
+   \   000002 905F         CLRW      Y
+   \   000004 9097         LD        YL, A
+   \   000006 72A9 5380    ADDW      Y, #0x5380
+   \   00000A 93           LDW       X, Y
+    263          
+    264            if (NewState != DISABLE)
+   \   00000B 3D ..        TNZ       S:?b0
+   \   00000D 27 05        JREQ      L:??DAC_Cmd_0
+    265            {
+    266              /* Enable the selected DAC channel */
+    267              (*(uint8_t*)(cr1addr)) |= DAC_CR1_EN;
+   \   00000F F6           LD        A, (X)
+   \   000010 AA 01        OR        A, #0x1
+   \   000012 F7           LD        (X), A
+   \   000013 87           RETF
+    268            }
+    269            else
+    270            {
+    271              /* Disable the selected DAC channel */
+    272              (*(uint8_t*)(cr1addr)) &= (uint8_t) ~(DAC_CR1_EN);
+   \                     ??DAC_Cmd_0:
+   \   000014 F6           LD        A, (X)
+   \   000015 A4 FE        AND       A, #0xfe
+   \   000017 F7           LD        (X), A
+    273            }
+    274          }
+   \   000018 87           RETF
+    275          
+    276          /**
+    277            * @brief  Enables or disables the selected DAC channel software trigger.
+    278            * @param  DAC_Channel: the selected DAC channel. 
+    279            *          This parameter can be one of the following values:
+    280            *            @arg DAC_Channel_1: DAC Channel1 selected
+    281            *            @arg DAC_Channel_2: DAC Channel2 selected
+    282            * @param  NewState: new state of the selected DAC channel software trigger.
+    283            *          This parameter can be: ENABLE or DISABLE.
+    284            * @retval None.
+    285            */
+
+   \                                 In section .far_func.text, align 1
+    286          void DAC_SoftwareTriggerCmd(DAC_Channel_TypeDef DAC_Channel, FunctionalState NewState)
+    287          {
+    288            /* Check the parameters */
+    289            assert_param(IS_DAC_CHANNEL(DAC_Channel));
+    290            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    291          
+    292            if (NewState != DISABLE)
+   \                     DAC_SoftwareTriggerCmd:
+   \   000000 3D ..        TNZ       S:?b0
+   \   000002 27 0E        JREQ      L:??DAC_SoftwareTriggerCmd_0
+    293            {
+    294              /* Enable software trigger for the selected DAC channel */
+    295              DAC->SWTRIGR |= (uint8_t)(DAC_SWTRIGR_SWTRIG1 << DAC_Channel);
+   \   000004 5F           CLRW      X
+   \   000005 5C           INCW      X
+   \   000006 8D ......    CALLF     L:?sll16_x_x_a
+   \   00000A 9F           LD        A, XL
+   \   00000B CA 5384      OR        A, L:0x5384
+   \   00000E C7 5384      LD        L:0x5384, A
+   \   000011 87           RETF
+    296            }
+    297            else
+    298            {
+    299              /* Disable software trigger for the selected DAC channel */
+    300              DAC->SWTRIGR &= (uint8_t)~((uint8_t)(DAC_SWTRIGR_SWTRIG1 << DAC_Channel));
+   \                     ??DAC_SoftwareTriggerCmd_0:
+   \   000012 5F           CLRW      X
+   \   000013 5C           INCW      X
+   \   000014 8D ......    CALLF     L:?sll16_x_x_a
+   \   000018 9F           LD        A, XL
+   \   000019 43           CPL       A
+   \   00001A C4 5384      AND       A, L:0x5384
+   \   00001D C7 5384      LD        L:0x5384, A
+    301            }
+    302          }
+   \   000020 87           RETF
+    303          
+    304          /**
+    305            * @brief  Enables or disables simultaneously the two DAC channels software
+    306            *         triggers.
+    307            * @param  NewState: new state of the DAC channels software triggers.
+    308            *          This parameter can be: ENABLE or DISABLE.
+    309            * @retval None.
+    310            */
+
+   \                                 In section .far_func.text, align 1
+    311          void DAC_DualSoftwareTriggerCmd(FunctionalState NewState)
+    312          {
+    313            /* Check the parameters */
+    314            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    315          
+    316            if (NewState != DISABLE)
+   \                     DAC_DualSoftwareTriggerCmd:
+   \   000000 4D           TNZ       A
+   \   000001 27 09        JREQ      L:??DAC_DualSoftwareTriggerCmd_0
+    317            {
+    318              /* Enable software trigger for both DAC channels */
+    319              DAC->SWTRIGR |= (DAC_SWTRIGR_SWTRIG1 | DAC_SWTRIGR_SWTRIG2) ;
+   \   000003 C6 5384      LD        A, L:0x5384
+   \   000006 AA 03        OR        A, #0x3
+   \   000008 C7 5384      LD        L:0x5384, A
+   \   00000B 87           RETF
+    320            }
+    321            else
+    322            {
+    323              /* Disable software trigger for both DAC channels */
+    324              DAC->SWTRIGR &= (uint8_t)~(DAC_SWTRIGR_SWTRIG1 | DAC_SWTRIGR_SWTRIG2);
+   \                     ??DAC_DualSoftwareTriggerCmd_0:
+   \   00000C C6 5384      LD        A, L:0x5384
+   \   00000F A4 FC        AND       A, #0xfc
+   \   000011 C7 5384      LD        L:0x5384, A
+    325            }
+    326          }
+   \   000014 87           RETF
+    327          
+    328          /**
+    329            * @brief  Enables or disables the selected DAC channel wave generation.
+    330            * @param  DAC_Channel: the selected DAC channel. 
+    331            *          This parameter can be one of the following values:
+    332            *            @arg DAC_Channel_1: DAC Channel1 selected
+    333            *            @arg DAC_Channel_2: DAC Channel2 selected
+    334            * @param  DAC_Wave: Specifies the wave type to enable or disable.
+    335            *          This parameter can be one of the following values:
+    336            *            @arg DAC_Wave_Noise: noise wave generation
+    337            *            @arg DAC_Wave_Triangle: triangle wave generation
+    338            * @param  NewState: new state of the selected DAC channel wave generation.
+    339            *          This parameter can be: ENABLE or DISABLE.
+    340            * @retval None
+    341            */
+
+   \                                 In section .far_func.text, align 1
+    342          void DAC_WaveGenerationCmd(DAC_Channel_TypeDef DAC_Channel,
+    343                                     DAC_Wave_TypeDef DAC_Wave,
+    344                                     FunctionalState NewState)
+    345          {
+   \                     DAC_WaveGenerationCmd:
+   \   000000 B7 ..        LD        S:?b2, A
+    346            uint8_t tmpreg = 0;
+   \   000002 3F ..        CLR       S:?b3
+    347          
+    348            /* Check the DAC parameters */
+    349            assert_param(IS_DAC_CHANNEL(DAC_Channel));
+    350            assert_param(IS_DAC_WAVE(DAC_Wave));
+    351            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    352          
+    353            /* Get the DAC CHxCR1 value & Clear WAVEN bits */
+    354            tmpreg = (uint8_t)((*(uint8_t*)(uint16_t)(DAC_BASE + CR1_Offset + (uint8_t)((uint8_t)DAC_Channel << 1))) & (uint8_t)~(DAC_CR1_WAVEN));
+   \   000004 B6 ..        LD        A, S:?b2
+   \   000006 48           SLL       A
+   \   000007 5F           CLRW      X
+   \   000008 97           LD        XL, A
+   \   000009 1C 5380      ADDW      X, #0x5380
+   \   00000C F6           LD        A, (X)
+   \   00000D A4 3F        AND       A, #0x3f
+   \   00000F B7 ..        LD        S:?b3, A
+    355          
+    356            if (NewState != DISABLE)
+   \   000011 3D ..        TNZ       S:?b1
+   \   000013 27 06        JREQ      L:??DAC_WaveGenerationCmd_0
+    357            {
+    358              tmpreg |= (uint8_t)(DAC_Wave);
+   \   000015 B6 ..        LD        A, S:?b0
+   \   000017 BA ..        OR        A, S:?b3
+   \   000019 B7 ..        LD        S:?b3, A
+    359            }
+    360          
+    361            /* Write to DAC CHxCR1 */
+    362            (*(uint8_t*) (uint16_t)(DAC_BASE + CR1_Offset +  (uint8_t)((uint8_t)DAC_Channel << 1))) = tmpreg;
+   \                     ??DAC_WaveGenerationCmd_0:
+   \   00001B B6 ..        LD        A, S:?b2
+   \   00001D 48           SLL       A
+   \   00001E 5F           CLRW      X
+   \   00001F 97           LD        XL, A
+   \   000020 1C 5380      ADDW      X, #0x5380
+   \   000023 B6 ..        LD        A, S:?b3
+   \   000025 F7           LD        (X), A
+    363          
+    364          }
+   \   000026 87           RETF
+    365          
+    366          /**
+    367            * @brief  Select DAC Noise Wave Generation LFSR according to the specified parameters.
+    368            * @param  DAC_Channel: the selected DAC channel. 
+    369            *          This parameter can be one of the following values:
+    370            *            @arg DAC_Channel_1: DAC Channel1 selected
+    371            *            @arg DAC_Channel_2: DAC Channel2 selected
+    372            * @param  DAC_LFSRUnmask : the selected unmasked bit.
+    373            *          This parameter can be one of the following values:
+    374            *            @arg DAC_LFSRUnmask_Bit0: Noise LFSR Unmask 1 LSB
+    375            *            @arg DAC_LFSRUnmask_Bits1_0: Noise LFSR Unmask 2 LSB  
+    376            *            @arg DAC_LFSRUnmask_Bit2_0: Noise LFSR Unmask 3 LSB
+    377            *            @arg DAC_LFSRUnmask_Bit3_0: Noise LFSR Unmask 4 LSB
+    378            *            @arg DAC_LFSRUnmask_Bit4_0: Noise LFSR Unmask 5 LSB
+    379            *            @arg DAC_LFSRUnmask_Bit5_0: Noise LFSR Unmask 6 LSB
+    380            *            @arg DAC_LFSRUnmask_Bit6_0: Noise LFSR Unmask 7 LSB
+    381            *            @arg DAC_LFSRUnmask_Bit7_0: Noise LFSR Unmask 8 LSB
+    382            *            @arg DAC_LFSRUnmask_Bit8_0: Noise LFSR Unmask 9 LSB
+    383            *            @arg DAC_LFSRUnmask_Bit9_0: Noise LFSR Unmask 10 LSB
+    384            *            @arg DAC_LFSRUnmask_Bit10_0: Noise LFSR Unmask 11 LSB
+    385            *            @arg DAC_LFSRUnmask_Bit11_0: Noise LFSR Unmask 12 LSB                    
+    386            * @retval None
+    387            */
+
+   \                                 In section .far_func.text, align 1
+    388          void DAC_SetNoiseWaveLFSR(DAC_Channel_TypeDef DAC_Channel, DAC_LFSRUnmask_TypeDef DAC_LFSRUnmask)
+    389          {
+    390            uint8_t tmpreg = 0;
+   \                     DAC_SetNoiseWaveLFSR:
+   \   000000 3F ..        CLR       S:?b1
+    391            uint16_t cr2addr = 0;
+   \   000002 905F         CLRW      Y
+    392          
+    393            /* Check the DAC parameters */
+    394            assert_param(IS_DAC_CHANNEL(DAC_Channel));
+    395            assert_param(IS_DAC_LFSR_UNMASK_TRIANGLE_AMPLITUDE(DAC_LFSRUnmask));
+    396          
+    397            /* Get the DAC CHxCR2 value  &  Clear MAMPx bits */
+    398            cr2addr = (uint16_t)(DAC_BASE + CR2_Offset + (uint8_t)((uint8_t)DAC_Channel << 1));
+   \   000004 48           SLL       A
+   \   000005 5F           CLRW      X
+   \   000006 97           LD        XL, A
+   \   000007 1C 5381      ADDW      X, #0x5381
+   \   00000A 9093         LDW       Y, X
+    399            tmpreg = (uint8_t)((*(uint8_t*)(cr2addr)) & (uint8_t)~(DAC_CR2_MAMPx));
+   \   00000C 90F6         LD        A, (Y)
+   \   00000E A4 F0        AND       A, #0xf0
+   \   000010 B7 ..        LD        S:?b1, A
+    400          
+    401            /* Write to DAC CHxCR2 */
+    402            (*(uint8_t*)(cr2addr)) = (uint8_t)( tmpreg | DAC_LFSRUnmask);
+   \   000012 B6 ..        LD        A, S:?b0
+   \   000014 BA ..        OR        A, S:?b1
+   \   000016 90F7         LD        (Y), A
+    403          }
+   \   000018 87           RETF
+    404          
+    405          /**
+    406            * @brief  Select DAC Triangle Wave Generation Amplitude according to the specified parameters.
+    407            * @param  DAC_Channel: the selected DAC channel. 
+    408            *          This parameter can be one of the following values:
+    409            *            @arg DAC_Channel_1: DAC Channel1 selected
+    410            *            @arg DAC_Channel_2: DAC Channel2 selected
+    411            * @param  DAC_TriangleAmplitude : the selected Amplitude
+    412            *          This parameter can be one of the following values:
+    413            *            @arg DAC_TriangleAmplitude_1: Triangle Amplitude = Vref.(1/4096)
+    414            *            @arg DAC_TriangleAmplitude_3: Triangle Amplitude = Vref.(3/4096)  
+    415            *            @arg DAC_TriangleAmplitude_7: Triangle Amplitude = Vref.(7/4096)
+    416            *            @arg DAC_TriangleAmplitude_15: Triangle Amplitude = Vref.(15/4096)
+    417            *            @arg DAC_TriangleAmplitude_31: Triangle Amplitude = Vref.(31/4096)
+    418            *            @arg DAC_TriangleAmplitude_63: Triangle Amplitude = Vref.(63/4096)
+    419            *            @arg DAC_TriangleAmplitude_127: Triangle Amplitude = Vref.(127/4096)
+    420            *            @arg DAC_TriangleAmplitude_255: Triangle Amplitude = Vref.(255/4096)
+    421            *            @arg DAC_TriangleAmplitude_511: Triangle Amplitude = Vref.(511/4096)
+    422            *            @arg DAC_TriangleAmplitude_1023: Triangle Amplitude = Vref.(1023/4096)
+    423            *            @arg DAC_TriangleAmplitude_2047: Triangle Amplitude = Vref.(2047/4096)
+    424            *            @arg DAC_TriangleAmplitude_4095: Triangle Amplitude = Vref.(4095/4096) 
+    425            * @retval None
+    426            */
+
+   \                                 In section .far_func.text, align 1
+    427          void DAC_SetTriangleWaveAmplitude(DAC_Channel_TypeDef DAC_Channel, DAC_TriangleAmplitude_TypeDef DAC_TriangleAmplitude)
+    428          {
+    429            uint8_t tmpreg = 0;
+   \                     DAC_SetTriangleWaveAmplitude:
+   \   000000 3F ..        CLR       S:?b1
+    430            uint16_t cr2addr = 0;
+   \   000002 905F         CLRW      Y
+    431          
+    432            /* Check the DAC parameters */
+    433            assert_param(IS_DAC_CHANNEL(DAC_Channel));
+    434            assert_param(IS_DAC_LFSR_UNMASK_TRIANGLE_AMPLITUDE(DAC_TriangleAmplitude));
+    435          
+    436          
+    437            /* Get the DAC CHxCR2 value  &  Clear MAMPx bits */
+    438            cr2addr = (uint16_t)(DAC_BASE + CR2_Offset + (uint8_t)((uint8_t)DAC_Channel << 1));
+   \   000004 48           SLL       A
+   \   000005 5F           CLRW      X
+   \   000006 97           LD        XL, A
+   \   000007 1C 5381      ADDW      X, #0x5381
+   \   00000A 9093         LDW       Y, X
+    439            tmpreg = (uint8_t)((*(uint8_t*)(cr2addr)) & (uint8_t)~(DAC_CR2_MAMPx));
+   \   00000C 90F6         LD        A, (Y)
+   \   00000E A4 F0        AND       A, #0xf0
+   \   000010 B7 ..        LD        S:?b1, A
+    440          
+    441            /* Write to DAC CHxCR2 */
+    442            (*(uint8_t*)(cr2addr)) = (uint8_t)( tmpreg | DAC_TriangleAmplitude);
+   \   000012 B6 ..        LD        A, S:?b0
+   \   000014 BA ..        OR        A, S:?b1
+   \   000016 90F7         LD        (Y), A
+    443          }
+   \   000018 87           RETF
+    444          
+    445          /**
+    446            * @brief  Set the specified data holding register value for DAC channel1.
+    447            * @param  DAC_Align: Specifies the data alignment for DAC channel1.
+    448            *          This parameter can be one of the following values:
+    449            *            @arg DAC_Align_8b_R: 8bit right data alignment selected
+    450            *            @arg DAC_Align_12b_L: 12bit left data alignment selected
+    451            *            @arg DAC_Align_12b_R: 12bit right data alignment selected
+    452            * @param  Data : Data to be loaded in the selected data holding register.
+    453            * @retval None.
+    454            */
+
+   \                                 In section .far_func.text, align 1
+    455          void DAC_SetChannel1Data(DAC_Align_TypeDef DAC_Align, uint16_t DAC_Data)
+    456          {
+   \                     DAC_SetChannel1Data:
+   \   000000 B7 ..        LD        S:?b2, A
+   \   000002 9093         LDW       Y, X
+    457            /* Check the parameters */
+    458            assert_param(IS_DAC_ALIGN(DAC_Align));
+    459          
+    460            if (DAC_Align != DAC_Align_8b_R)
+   \   000004 B6 ..        LD        A, S:?b2
+   \   000006 A1 08        CP        A, #0x8
+   \   000008 27 1D        JREQ      L:??DAC_SetChannel1Data_0
+    461            {
+    462              /* Set the DAC channel1 selected data holding register */
+    463              *(uint8_t*)((uint16_t)(DAC_BASE + CH1RDHRH_Offset + DAC_Align )) = (uint8_t)(((uint16_t)DAC_Data) >> 8);
+   \   00000A 5F           CLRW      X
+   \   00000B 41           EXG       A, XL
+   \   00000C B6 ..        LD        A, S:?b2
+   \   00000E 41           EXG       A, XL
+   \   00000F 1C 5388      ADDW      X, #0x5388
+   \   000012 BF ..        LDW       S:?w0, X
+   \   000014 93           LDW       X, Y
+   \   000015 4F           CLR       A
+   \   000016 01           RRWA      X, A
+   \   000017 9F           LD        A, XL
+   \   000018 92C7 ..      LD        [S:?w0.w], A
+    464              *(uint8_t*)((uint16_t)(DAC_BASE + CH1RDHRH_Offset + 1 + DAC_Align )) = (uint8_t)DAC_Data;
+   \   00001B 5F           CLRW      X
+   \   00001C 41           EXG       A, XL
+   \   00001D B6 ..        LD        A, S:?b2
+   \   00001F 41           EXG       A, XL
+   \   000020 1C 5389      ADDW      X, #0x5389
+   \   000023 909F         LD        A, YL
+   \   000025 F7           LD        (X), A
+   \   000026 87           RETF
+    465            }
+    466            else
+    467            {
+    468              /* Check the parameter */
+    469              assert_param(IS_DAC_DATA_08R(DAC_Data));
+    470          
+    471              /* Set the DAC channel1 selected data holding register */
+    472              DAC->CH1DHR8 = (uint8_t)(DAC_Data);
+   \                     ??DAC_SetChannel1Data_0:
+   \   000027 909F         LD        A, YL
+   \   000029 C7 5390      LD        L:0x5390, A
+    473            }
+    474          }
+   \   00002C 87           RETF
+    475          
+    476          /**
+    477            * @brief  Set the specified data holding register value for DAC channel2.
+    478            * @param  DAC_Align: Specifies the data alignment for DAC channel2.
+    479            *          This parameter can be one of the following values:
+    480            *            @arg DAC_Align_8b_R: 8bit right data alignment selected
+    481            *            @arg DAC_Align_12b_L: 12bit left data alignment selected
+    482            *            @arg DAC_Align_12b_R: 12bit right data alignment selected
+    483            * @param  Data : Data to be loaded in the selected data holding register.
+    484            * @retval None.
+    485            */
+
+   \                                 In section .far_func.text, align 1
+    486          void DAC_SetChannel2Data(DAC_Align_TypeDef DAC_Align, uint16_t DAC_Data)
+    487          {
+   \                     DAC_SetChannel2Data:
+   \   000000 B7 ..        LD        S:?b2, A
+   \   000002 9093         LDW       Y, X
+    488            /* Check the parameters */
+    489            assert_param(IS_DAC_ALIGN(DAC_Align));
+    490          
+    491            if (DAC_Align != DAC_Align_8b_R)
+   \   000004 B6 ..        LD        A, S:?b2
+   \   000006 A1 08        CP        A, #0x8
+   \   000008 27 1D        JREQ      L:??DAC_SetChannel2Data_0
+    492            {
+    493              /* Set the DAC channel2 selected data holding register */
+    494              *(uint8_t*)((uint16_t)(DAC_BASE + CH2RDHRH_Offset + DAC_Align )) = (uint8_t)(((uint16_t)DAC_Data) >> 8);
+   \   00000A 5F           CLRW      X
+   \   00000B 41           EXG       A, XL
+   \   00000C B6 ..        LD        A, S:?b2
+   \   00000E 41           EXG       A, XL
+   \   00000F 1C 5394      ADDW      X, #0x5394
+   \   000012 BF ..        LDW       S:?w0, X
+   \   000014 93           LDW       X, Y
+   \   000015 4F           CLR       A
+   \   000016 01           RRWA      X, A
+   \   000017 9F           LD        A, XL
+   \   000018 92C7 ..      LD        [S:?w0.w], A
+    495              *(uint8_t*)((uint16_t)(DAC_BASE + CH2RDHRH_Offset + 1 + DAC_Align )) = (uint8_t)DAC_Data;
+   \   00001B 5F           CLRW      X
+   \   00001C 41           EXG       A, XL
+   \   00001D B6 ..        LD        A, S:?b2
+   \   00001F 41           EXG       A, XL
+   \   000020 1C 5395      ADDW      X, #0x5395
+   \   000023 909F         LD        A, YL
+   \   000025 F7           LD        (X), A
+   \   000026 87           RETF
+    496            }
+    497            else
+    498            {
+    499              /* Check the parameter */
+    500              assert_param(IS_DAC_DATA_08R(DAC_Data));
+    501          
+    502              /* Set the DAC channel2 selected data holding register */
+    503              DAC->CH2DHR8 = (uint8_t)(DAC_Data);
+   \                     ??DAC_SetChannel2Data_0:
+   \   000027 909F         LD        A, YL
+   \   000029 C7 539C      LD        L:0x539c, A
+    504            }
+    505          }
+   \   00002C 87           RETF
+    506          
+    507          /**
+    508            * @brief  Set the specified data holding register value for dual channel DAC.
+    509            * @param  DAC_Align: Specifies the data alignment for dual channel DAC.
+    510            *          This parameter can be one of the following values:
+    511            *            @arg DAC_Align_8b_R: 8bit right data alignment selected
+    512            *            @arg DAC_Align_12b_L: 12bit left data alignment selected
+    513            *            @arg DAC_Align_12b_R: 12bit right data alignment selected
+    514            * @param  Data2: Data for DAC Channel2 to be loaded in the selected data 
+    515            *         holding register.
+    516            * @param  Data1: Data for DAC Channel1 to be loaded in the selected data 
+    517            *         holding register.
+    518            * @note In dual mode, a unique register access is required to write in both
+    519            *       DAC channels at the same time.
+    520            * @retval None.
+    521            */
+
+   \                                 In section .far_func.text, align 1
+    522          void DAC_SetDualChannelData(DAC_Align_TypeDef DAC_Align, uint16_t DAC_Data2, uint16_t DAC_Data1)
+    523          {
+   \                     DAC_SetDualChannelData:
+   \   000000 BF ..        LDW       S:?w1, X
+   \   000002 90BF ..      LDW       S:?w0, Y
+    524            uint16_t dchxrdhrhaddr = 0;
+   \   000005 905F         CLRW      Y
+    525          
+    526            /* Check the parameters */
+    527            assert_param(IS_DAC_ALIGN(DAC_Align));
+    528          
+    529            if (DAC_Align != DAC_Align_8b_R)
+   \   000007 A1 08        CP        A, #0x8
+   \   000009 27 25        JREQ      L:??DAC_SetDualChannelData_0
+    530            {
+    531              /* Identify the DCHxRDHRH address*/
+    532              dchxrdhrhaddr = (uint16_t)(DAC_BASE + DCH1RDHRH_Offset + DAC_Align);
+   \   00000B 5F           CLRW      X
+   \   00000C 97           LD        XL, A
+   \   00000D 1C 53A0      ADDW      X, #0x53a0
+   \   000010 9093         LDW       Y, X
+    533          
+    534              /* Set the DAC channels Dual data holding registers */
+    535              *(uint8_t*)(uint16_t)dchxrdhrhaddr = (uint8_t)(((uint16_t)DAC_Data1) >> 8);
+   \   000012 BE ..        LDW       X, S:?w0
+   \   000014 4F           CLR       A
+   \   000015 01           RRWA      X, A
+   \   000016 9F           LD        A, XL
+   \   000017 90F7         LD        (Y), A
+    536              *(uint8_t*)(uint16_t)(dchxrdhrhaddr + 1) = (uint8_t)DAC_Data1;
+   \   000019 93           LDW       X, Y
+   \   00001A 5C           INCW      X
+   \   00001B B6 ..        LD        A, S:?b1
+   \   00001D F7           LD        (X), A
+    537              *(uint8_t*)(uint16_t)(dchxrdhrhaddr + 2) = (uint8_t)(((uint16_t)DAC_Data2) >> 8);
+   \   00001E BE ..        LDW       X, S:?w1
+   \   000020 4F           CLR       A
+   \   000021 01           RRWA      X, A
+   \   000022 9F           LD        A, XL
+   \   000023 93           LDW       X, Y
+   \   000024 1C 0002      ADDW      X, #0x2
+   \   000027 F7           LD        (X), A
+    538              *(uint8_t*)(uint16_t)(dchxrdhrhaddr + 3) = (uint8_t)DAC_Data2;
+   \   000028 93           LDW       X, Y
+   \   000029 1C 0003      ADDW      X, #0x3
+   \   00002C B6 ..        LD        A, S:?b3
+   \   00002E F7           LD        (X), A
+   \   00002F 87           RETF
+    539            }
+    540            else
+    541            {
+    542              /* Check the parameter */
+    543              assert_param(IS_DAC_DATA_08R(DAC_Data1 | DAC_Data2));
+    544          
+    545              /* Set the DAC channels Dual data holding registers */
+    546              DAC->DCH1DHR8 = (uint8_t)(DAC_Data1);
+   \                     ??DAC_SetDualChannelData_0:
+   \   000030 B6 ..        LD        A, S:?b1
+   \   000032 C7 53A8      LD        L:0x53a8, A
+    547              DAC->DCH2DHR8 = (uint8_t)(DAC_Data2);
+   \   000035 B6 ..        LD        A, S:?b3
+   \   000037 C7 53A9      LD        L:0x53a9, A
+    548            }
+    549          }
+   \   00003A 87           RETF
+    550          
+    551          /**
+    552            * @brief  Returns the last data output value of the selected DAC channel.
+    553            * @param  DAC_Channel: the selected DAC channel. 
+    554            *          This parameter can be one of the following values:
+    555            *            @arg DAC_Channel_1: DAC Channel1 selected
+    556            *            @arg DAC_Channel_2: DAC Channel2 selected
+    557            * @retval The selected DAC channel data output value.
+    558            */
+
+   \                                 In section .far_func.text, align 1
+    559          uint16_t DAC_GetDataOutputValue(DAC_Channel_TypeDef DAC_Channel)
+    560          {
+    561            uint16_t outputdata = 0;
+   \                     DAC_GetDataOutputValue:
+   \   000000 905F         CLRW      Y
+    562            uint16_t tmp = 0;
+   \   000002 5F           CLRW      X
+    563          
+    564            /* Check the parameters */
+    565            assert_param(IS_DAC_CHANNEL(DAC_Channel));
+    566          
+    567            if ( DAC_Channel ==  DAC_Channel_1)
+   \   000003 4D           TNZ       A
+   \   000004 26 1C        JRNE      L:??DAC_GetDataOutputValue_0
+    568            {
+    569              /* Returns the DAC channel data output register value */
+    570              tmp = (uint16_t)((uint16_t)DAC->CH1DORH << 8);
+   \   000006 C6 53AC      LD        A, L:0x53ac
+   \   000009 5F           CLRW      X
+   \   00000A 97           LD        XL, A
+   \   00000B 4F           CLR       A
+   \   00000C 02           RLWA      X, A
+    571              outputdata = (uint16_t)(tmp | (DAC->CH1DORL));
+   \   00000D C6 53AD      LD        A, L:0x53ad
+   \   000010 905F         CLRW      Y
+   \   000012 9097         LD        YL, A
+   \   000014 90BF ..      LDW       S:?w0, Y
+   \   000017 01           RRWA      X, A
+   \   000018 BA ..        OR        A, S:?b1
+   \   00001A 01           RRWA      X, A
+   \   00001B BA ..        OR        A, S:?b0
+   \   00001D 01           RRWA      X, A
+   \   00001E 9093         LDW       Y, X
+   \   000020 20 1A        JRA       L:??DAC_GetDataOutputValue_1
+    572            }
+    573            else
+    574            {
+    575              /* Returns the DAC channel data output register value */
+    576              tmp = (uint16_t)((uint16_t)DAC->CH2DORH << 8);
+   \                     ??DAC_GetDataOutputValue_0:
+   \   000022 C6 53B0      LD        A, L:0x53b0
+   \   000025 5F           CLRW      X
+   \   000026 97           LD        XL, A
+   \   000027 4F           CLR       A
+   \   000028 02           RLWA      X, A
+    577              outputdata = (uint16_t)(tmp | (DAC->CH2DORL));
+   \   000029 C6 53B1      LD        A, L:0x53b1
+   \   00002C 905F         CLRW      Y
+   \   00002E 9097         LD        YL, A
+   \   000030 90BF ..      LDW       S:?w0, Y
+   \   000033 01           RRWA      X, A
+   \   000034 BA ..        OR        A, S:?b1
+   \   000036 01           RRWA      X, A
+   \   000037 BA ..        OR        A, S:?b0
+   \   000039 01           RRWA      X, A
+   \   00003A 9093         LDW       Y, X
+    578            }
+    579          
+    580            /* return the selected DAC channel data output value.*/
+    581            return (uint16_t)outputdata;
+   \                     ??DAC_GetDataOutputValue_1:
+   \   00003C 93           LDW       X, Y
+   \   00003D 87           RETF
+    582          }
+    583          
+    584          /**
+    585            * @}
+    586            */
+    587          
+    588          /** @defgroup DAC_Group2 DMA management functions
+    589           *  @brief   DMA management functions
+    590           *
+    591          @verbatim   
+    592           ===============================================================================
+    593                                    DMA management function
+    594           ===============================================================================  
+    595          
+    596          @endverbatim
+    597            * @{
+    598            */
+    599            
+    600          /**
+    601            * @brief  Enables or disables the specified DAC channel DMA request.
+    602            *         When enabled DMA1 is generated when an external trigger occurs
+    603            * @param  DAC_Channel: the selected DAC channel.
+    604            *          This parameter can be one of the following values:
+    605            *            @arg DAC_Channel_1: DAC Channel1 selected
+    606            *            @arg DAC_Channel_2: DAC Channel2 selected
+    607            * @param  NewState: new state of the selected DAC channel DMA request.
+    608            *          This parameter can be: ENABLE or DISABLE.
+    609            *  The DAC channel1 (channel2) is mapped on DMA1 channel3 (channel1) which 
+    610            *  must be already configured. 
+    611            * @retval None
+    612            */
+
+   \                                 In section .far_func.text, align 1
+    613          void DAC_DMACmd(DAC_Channel_TypeDef DAC_Channel, FunctionalState NewState)
+    614          {
+    615            uint16_t cr2addr = 0;
+   \                     DAC_DMACmd:
+   \   000000 5F           CLRW      X
+    616          
+    617            /* Check the parameters */
+    618            assert_param(IS_DAC_CHANNEL(DAC_Channel));
+    619            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    620          
+    621            /* Find CHxCR2 register Address */
+    622            cr2addr = DAC_BASE + CR2_Offset + (uint8_t)((uint8_t)DAC_Channel << 1);
+   \   000001 48           SLL       A
+   \   000002 905F         CLRW      Y
+   \   000004 9097         LD        YL, A
+   \   000006 72A9 5381    ADDW      Y, #0x5381
+   \   00000A 93           LDW       X, Y
+    623          
+    624            if (NewState != DISABLE)
+   \   00000B 3D ..        TNZ       S:?b0
+   \   00000D 27 05        JREQ      L:??DAC_DMACmd_0
+    625            {
+    626              /* Enable the selected DAC channel DMA request */
+    627              (*(uint8_t*)(cr2addr)) |= DAC_CR2_DMAEN;
+   \   00000F F6           LD        A, (X)
+   \   000010 AA 10        OR        A, #0x10
+   \   000012 F7           LD        (X), A
+   \   000013 87           RETF
+    628            }
+    629            else
+    630            {
+    631              /* Disable the selected DAC channel DMA request */
+    632              (*(uint8_t*)(cr2addr)) &= (uint8_t)~(DAC_CR2_DMAEN);
+   \                     ??DAC_DMACmd_0:
+   \   000014 F6           LD        A, (X)
+   \   000015 A4 EF        AND       A, #0xef
+   \   000017 F7           LD        (X), A
+    633            }
+    634          }
+   \   000018 87           RETF
+    635          
+    636          /**
+    637            * @}
+    638            */
+    639          
+    640          /** @defgroup DAC_Group3 Interrupts and flags management functions
+    641           *  @brief   Interrupts and flags management functions
+    642           *
+    643          @verbatim   
+    644           ===============================================================================
+    645                             Interrupts and flags management functions
+    646           ===============================================================================  
+    647          
+    648          @endverbatim
+    649            * @{
+    650            */
+    651              
+    652          /**
+    653            * @brief  Enables or disables the specified DAC interrupts.
+    654            * @param  DAC_Channel: the selected DAC channel. 
+    655            *          This parameter can be one of the following values:
+    656            *            @arg DAC_Channel_1: DAC Channel1 selected
+    657            *            @arg DAC_Channel_2: DAC Channel2 selected
+    658            * @param  DAC_IT: specifies the DAC interrupt sources to be enabled or disabled. 
+    659            *   This parameter can be the following values:
+    660            *            @arg DAC_IT_DMAUDR: DMA underrun interrupt mask
+    661            * @note The DMA underrun occurs when a second external trigger arrives before
+    662            *       the acknowledgement for the first external trigger is received (first request).
+    663            * @param  NewState: new state of the specified DAC interrupts.
+    664            *          This parameter can be: ENABLE or DISABLE.
+    665            * @retval None
+    666            */
+
+   \                                 In section .far_func.text, align 1
+    667          void DAC_ITConfig(DAC_Channel_TypeDef DAC_Channel, DAC_IT_TypeDef DAC_IT, FunctionalState NewState)
+    668          {
+    669            uint16_t cr2addr = 0;
+   \                     DAC_ITConfig:
+   \   000000 905F         CLRW      Y
+    670          
+    671            /* Check the parameters */
+    672            assert_param(IS_DAC_CHANNEL(DAC_Channel));
+    673            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    674            assert_param(IS_DAC_IT(DAC_IT));
+    675          
+    676            /* Find CHxCR2 register Address */
+    677            cr2addr = DAC_BASE + CR2_Offset + (uint8_t)((uint8_t)DAC_Channel << 1);
+   \   000002 48           SLL       A
+   \   000003 5F           CLRW      X
+   \   000004 97           LD        XL, A
+   \   000005 1C 5381      ADDW      X, #0x5381
+   \   000008 9093         LDW       Y, X
+    678          
+    679            if (NewState != DISABLE)
+   \   00000A 3D ..        TNZ       S:?b1
+   \   00000C 27 07        JREQ      L:??DAC_ITConfig_0
+    680            {
+    681              /* Enable the selected DAC interrupts */
+    682              (*(uint8_t*)(cr2addr)) |=  (uint8_t)(DAC_IT);
+   \   00000E B6 ..        LD        A, S:?b0
+   \   000010 90FA         OR        A, (Y)
+   \   000012 90F7         LD        (Y), A
+   \   000014 87           RETF
+    683            }
+    684            else
+    685            {
+    686              /* Disable the selected DAC interrupts */
+    687              (*(uint8_t*)(cr2addr)) &= (uint8_t)(~(DAC_IT));
+   \                     ??DAC_ITConfig_0:
+   \   000015 33 ..        CPL       S:?b0
+   \   000017 B6 ..        LD        A, S:?b0
+   \   000019 90F4         AND       A, (Y)
+   \   00001B 90F7         LD        (Y), A
+    688            }
+    689          }
+   \   00001D 87           RETF
+    690          
+    691          /**
+    692            * @brief  Checks whether the specified DAC flag is set or not.
+    693            * @param  DAC_Channel: thee selected DAC channel. 
+    694            *          This parameter can be one of the following values:
+    695            *            @arg DAC_Channel_1: DAC Channel1 selected
+    696            *            @arg DAC_Channel_2: DAC Channel2 selected
+    697            * @param  DAC_FLAG: specifies the flag to check. 
+    698            *   This parameter can be only of the following value:
+    699            *            @arg DAC_FLAG_DMAUDR: DMA underrun flag
+    700            * @note The DMA underrun occurs when a second external trigger arrives before
+    701            *       the acknowledgement for the first external trigger is received (first request).
+    702            * @retval The new state of DAC_FLAG (SET or RESET).
+    703            */
+
+   \                                 In section .far_func.text, align 1
+    704          FlagStatus DAC_GetFlagStatus(DAC_Channel_TypeDef DAC_Channel, DAC_FLAG_TypeDef DAC_FLAG)
+    705          {
+    706            FlagStatus flagstatus = RESET;
+   \                     DAC_GetFlagStatus:
+   \   000000 3F ..        CLR       S:?b2
+    707            uint8_t flag = 0;
+   \   000002 3F ..        CLR       S:?b1
+    708          
+    709            /* Check the parameters */
+    710            assert_param(IS_DAC_CHANNEL(DAC_Channel));
+    711            assert_param(IS_DAC_FLAG(DAC_FLAG));
+    712          
+    713            flag = (uint8_t)(DAC_FLAG << DAC_Channel);
+   \   000004 5F           CLRW      X
+   \   000005 41           EXG       A, XL
+   \   000006 B6 ..        LD        A, S:?b0
+   \   000008 41           EXG       A, XL
+   \   000009 8D ......    CALLF     L:?sll16_x_x_a
+   \   00000D 9F           LD        A, XL
+   \   00000E B7 ..        LD        S:?b1, A
+    714          
+    715            /* Check the status of the specified DAC flag */
+    716            if ((DAC->SR & flag ) != (uint8_t)RESET)
+   \   000010 B6 ..        LD        A, S:?b1
+   \   000012 C4 5385      AND       A, L:0x5385
+   \   000015 A1 00        CP        A, #0x0
+   \   000017 27 06        JREQ      L:??DAC_GetFlagStatus_0
+    717            {
+    718              /* DAC FLAG is set */
+    719              flagstatus = SET;
+   \   000019 35 01 ....   MOV       S:?b2, #0x1
+   \   00001D 20 02        JRA       L:??DAC_GetFlagStatus_1
+    720            }
+    721            else
+    722            {
+    723              /* DAC FLAG is reset */
+    724              flagstatus = RESET;
+   \                     ??DAC_GetFlagStatus_0:
+   \   00001F 3F ..        CLR       S:?b2
+    725            }
+    726          
+    727            /* Return the DAC FLAG status */
+    728            return  flagstatus;
+   \                     ??DAC_GetFlagStatus_1:
+   \   000021 B6 ..        LD        A, S:?b2
+   \   000023 87           RETF
+    729          }
+    730          
+    731          /**
+    732            * @brief  Clears the DAC channel's pending flags.
+    733            * @param  DAC_Channel: the selected DAC channel. 
+    734            *          This parameter can be one of the following values:
+    735            *            @arg DAC_Channel_1: DAC Channel1 selected
+    736            *            @arg DAC_Channel_2: DAC Channel2 selected
+    737            * @param  DAC_FLAG: specifies the flag to clear. 
+    738            *   This parameter can be of the following value:
+    739            *            @arg DAC_FLAG_DMAUDR: DMA underrun flag                          
+    740            * @retval None
+    741            */
+
+   \                                 In section .far_func.text, align 1
+    742          void DAC_ClearFlag(DAC_Channel_TypeDef DAC_Channel, DAC_FLAG_TypeDef DAC_FLAG)
+    743          {
+    744            uint8_t flag = 0;
+   \                     DAC_ClearFlag:
+   \   000000 3F ..        CLR       S:?b1
+    745          
+    746            /* Check the parameters */
+    747            assert_param(IS_DAC_CHANNEL(DAC_Channel));
+    748            assert_param(IS_DAC_FLAG(DAC_FLAG));
+    749          
+    750            /* identify the selected flag*/
+    751            flag = (uint8_t)(DAC_FLAG << DAC_Channel);
+   \   000002 5F           CLRW      X
+   \   000003 41           EXG       A, XL
+   \   000004 B6 ..        LD        A, S:?b0
+   \   000006 41           EXG       A, XL
+   \   000007 8D ......    CALLF     L:?sll16_x_x_a
+   \   00000B 9F           LD        A, XL
+   \   00000C B7 ..        LD        S:?b1, A
+    752          
+    753            /* Clear the selected DAC flag */
+    754            DAC->SR = (uint8_t)(~flag);
+   \   00000E 33 ..        CPL       S:?b1
+   \   000010 B6 ..        LD        A, S:?b1
+   \   000012 C7 5385      LD        L:0x5385, A
+    755          }
+   \   000015 87           RETF
+    756          
+    757          /**
+    758            * @brief  Checks whether the specified DAC interrupt has occurred or not.
+    759            * @param  DAC_Channel: the selected DAC channel. 
+    760            *          This parameter can be one of the following values:
+    761            *            @arg DAC_Channel_1: DAC Channel1 selected
+    762            *            @arg DAC_Channel_2: DAC Channel2 selected
+    763            * @param  DAC_IT: specifies the DAC interrupt source to check. 
+    764            *   This parameter can be the following values:
+    765            *            @arg DAC_IT_DMAUDR: DMA underrun interrupt mask
+    766            * @note The DMA underrun occurs when a second external trigger arrives before
+    767            *       the acknowledgement for the first external trigger is received (first request).
+    768            * @retval The new state of DAC_IT (SET or RESET).
+    769            */
+
+   \                                 In section .far_func.text, align 1
+    770          ITStatus DAC_GetITStatus(DAC_Channel_TypeDef DAC_Channel, DAC_IT_TypeDef DAC_IT)
+    771          {
+   \                     DAC_GetITStatus:
+   \   000000 B7 ..        LD        S:?b5, A
+   \   000002 45 .. ..     MOV       S:?b1, S:?b0
+    772            ITStatus itstatus = RESET;
+   \   000005 3F ..        CLR       S:?b0
+    773            uint8_t enablestatus = 0;
+   \   000007 3F ..        CLR       S:?b3
+    774            uint8_t flagstatus = 0;
+   \   000009 3F ..        CLR       S:?b2
+    775            uint8_t tempreg = 0;
+   \   00000B 3F ..        CLR       S:?b4
+    776          
+    777            /* Check the parameters */
+    778            assert_param(IS_DAC_CHANNEL(DAC_Channel));
+    779            assert_param(IS_DAC_IT(DAC_IT));
+    780          
+    781            /* identify the status of the IT and its correspondent flag*/
+    782            tempreg = *(uint8_t*)(uint16_t)(DAC_BASE + CR2_Offset + (uint8_t)((uint8_t)DAC_Channel << 2));
+   \   00000D B6 ..        LD        A, S:?b5
+   \   00000F 48           SLL       A
+   \   000010 48           SLL       A
+   \   000011 5F           CLRW      X
+   \   000012 97           LD        XL, A
+   \   000013 1C 5381      ADDW      X, #0x5381
+   \   000016 F6           LD        A, (X)
+   \   000017 B7 ..        LD        S:?b4, A
+    783            enablestatus = (uint8_t)( tempreg & (uint8_t)((uint8_t)DAC_IT << DAC_Channel));
+   \   000019 5F           CLRW      X
+   \   00001A 41           EXG       A, XL
+   \   00001B B6 ..        LD        A, S:?b1
+   \   00001D 41           EXG       A, XL
+   \   00001E B6 ..        LD        A, S:?b5
+   \   000020 8D ......    CALLF     L:?sll16_x_x_a
+   \   000024 9F           LD        A, XL
+   \   000025 B4 ..        AND       A, S:?b4
+   \   000027 B7 ..        LD        S:?b3, A
+    784            flagstatus = (uint8_t)(DAC->SR & (uint8_t)(DAC_IT >> ((uint8_t)0x05 - DAC_Channel)));
+   \   000029 A6 05        LD        A, #0x5
+   \   00002B B0 ..        SUB       A, S:?b5
+   \   00002D 5F           CLRW      X
+   \   00002E 41           EXG       A, XL
+   \   00002F B6 ..        LD        A, S:?b1
+   \   000031 41           EXG       A, XL
+   \   000032 8D ......    CALLF     L:?sra16_x_x_a
+   \   000036 9F           LD        A, XL
+   \   000037 C4 5385      AND       A, L:0x5385
+   \   00003A B7 ..        LD        S:?b2, A
+    785          
+    786            /* Check the status of the specified DAC interrupt */
+    787            if (((flagstatus) != (uint8_t)RESET) && enablestatus)
+   \   00003C 3D ..        TNZ       S:?b2
+   \   00003E 27 0A        JREQ      L:??DAC_GetITStatus_0
+   \   000040 3D ..        TNZ       S:?b3
+   \   000042 27 06        JREQ      L:??DAC_GetITStatus_0
+    788            {
+    789              /* DAC IT is set */
+    790              itstatus = SET;
+   \   000044 35 01 ....   MOV       S:?b0, #0x1
+   \   000048 20 02        JRA       L:??DAC_GetITStatus_1
+    791            }
+    792            else
+    793            {
+    794              /* DAC IT is reset */
+    795              itstatus = RESET;
+   \                     ??DAC_GetITStatus_0:
+   \   00004A 3F ..        CLR       S:?b0
+    796            }
+    797          
+    798            /* Return the DAC IT status */
+    799            return  itstatus;
+   \                     ??DAC_GetITStatus_1:
+   \   00004C B6 ..        LD        A, S:?b0
+   \   00004E 87           RETF
+    800          }
+    801          
+    802          /**
+    803            * @brief  Clears the DAC channel's interrupt pending bits.
+    804            * @param  DAC_Channel: the selected DAC channel. 
+    805            *          This parameter can be one of the following values:
+    806            *            @arg DAC_Channel_1: DAC Channel1 selected
+    807            *            @arg DAC_Channel_2: DAC Channel2 selected
+    808            * @param  DAC_IT: specifies the DAC interrupt pending bit to clear.
+    809            *   This parameter can be the following values:
+    810            *            @arg DAC_IT_DMAUDR: DMA underrun interrupt mask                         
+    811            * @retval None
+    812            */
+
+   \                                 In section .far_func.text, align 1
+    813          void DAC_ClearITPendingBit(DAC_Channel_TypeDef DAC_Channel, DAC_IT_TypeDef DAC_IT)
+    814          {
+   \                     DAC_ClearITPendingBit:
+   \   000000 B7 ..        LD        S:?b1, A
+    815            /* Check the parameters */
+    816            assert_param(IS_DAC_CHANNEL(DAC_Channel));
+    817            assert_param(IS_DAC_IT(DAC_IT));
+    818          
+    819            /* Clear the selected DAC interrupt pending bits */
+    820            DAC->SR = (uint8_t)~(uint8_t)((uint8_t)DAC_IT >> (0x05 - DAC_Channel));
+   \   000002 A6 05        LD        A, #0x5
+   \   000004 B0 ..        SUB       A, S:?b1
+   \   000006 5F           CLRW      X
+   \   000007 41           EXG       A, XL
+   \   000008 B6 ..        LD        A, S:?b0
+   \   00000A 41           EXG       A, XL
+   \   00000B 8D ......    CALLF     L:?sra16_x_x_a
+   \   00000F 9F           LD        A, XL
+   \   000010 43           CPL       A
+   \   000011 C7 5385      LD        L:0x5385, A
+    821          }
+   \   000014 87           RETF
+    822          
+    823          /**
+    824            * @}
+    825            */
+    826          
+    827          /**
+    828            * @}
+    829            */ 
+    830          
+    831          /**
+    832            * @}
+    833            */ 
+    834          
+    835          /**
+    836            * @}
+    837            */ 
+    838          
+    839          /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      22  DAC_ClearFlag
+      21  DAC_ClearITPendingBit
+      25  DAC_Cmd
+      25  DAC_DMACmd
+     105  DAC_DeInit
+      21  DAC_DualSoftwareTriggerCmd
+      62  DAC_GetDataOutputValue
+      36  DAC_GetFlagStatus
+      79  DAC_GetITStatus
+      30  DAC_ITConfig
+      52  DAC_Init
+      45  DAC_SetChannel1Data
+      45  DAC_SetChannel2Data
+      59  DAC_SetDualChannelData
+      25  DAC_SetNoiseWaveLFSR
+      25  DAC_SetTriangleWaveAmplitude
+      33  DAC_SoftwareTriggerCmd
+      39  DAC_WaveGenerationCmd
+
+ 
+ 749 bytes in section .far_func.text
+ 
+ 749 bytes of CODE memory
+
+Errors: none
+Warnings: none

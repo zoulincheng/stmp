@@ -1,0 +1,274 @@
+###############################################################################
+#                                                                             #
+# IAR C/C++ Compiler V1.42.1.142 for STM8               01/Jul/2016  17:36:14 #
+# Copyright 2010-2013 IAR Systems AB.                                         #
+#                                                                             #
+#    Source file  =  E:\hwpro-2016\20160627_L\drivers\spi.c                   #
+#    Command line =  E:\hwpro-2016\20160627_L\drivers\spi.c -e -Ol --no_cse   #
+#                    --no_unroll --no_inline --no_code_motion --no_tbaa       #
+#                    --no_cross_call --debug --code_model medium              #
+#                    --data_model medium -o E:\hwpro-2016\20160627_L\iar\Debu #
+#                    g\Obj\ --dlib_config "C:\Program Files (x86)\IAR         #
+#                    Systems\Embedded Workbench 6.5\stm8\LIB\dlstm8mmn.h" -D  #
+#                    STM8L15X_MD -lC E:\hwpro-2016\20160627_L\iar\Debug\List\ #
+#                     -I E:\hwpro-2016\20160627_L\iar\..\stm8l15x_lib\inc\    #
+#                    -I E:\hwpro-2016\20160627_L\iar\..\user\inc\ -I          #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\xprintf\ -I        #
+#                    E:\hwpro-2016\20160627_L\iar\..\drivers\ -I              #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\ -I                #
+#                    E:\hwpro-2016\20160627_L\iar\..\app\ --vregs 16          #
+#    List file    =  E:\hwpro-2016\20160627_L\iar\Debug\List\spi.lst          #
+#    Object file  =  E:\hwpro-2016\20160627_L\iar\Debug\Obj\spi.o             #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+E:\hwpro-2016\20160627_L\drivers\spi.c
+      1          #include "basictype.h"
+      2          #include "stm8l15x.h"
+
+  typedef unsigned char     uint8_t;
+                            ^
+"E:\hwpro-2016\20160627_L\stm8l15x_lib\inc\stm8l15x.h",227  Warning[Pe301]: 
+          typedef name has already been declared (with same type)
+
+  typedef unsigned short    uint16_t;
+                            ^
+"E:\hwpro-2016\20160627_L\stm8l15x_lib\inc\stm8l15x.h",228  Warning[Pe301]: 
+          typedef name has already been declared (with same type)
+
+  typedef uint16_t u16;
+                   ^
+"E:\hwpro-2016\20160627_L\stm8l15x_lib\inc\stm8l15x.h",238  Warning[Pe301]: 
+          typedef name has already been declared (with same type)
+
+  typedef uint8_t  u8;
+                   ^
+"E:\hwpro-2016\20160627_L\stm8l15x_lib\inc\stm8l15x.h",239  Warning[Pe301]: 
+          typedef name has already been declared (with same type)
+      3          
+      4          #include "sysprintf.h"
+      5          #include "boardiodef.h"
+      6          
+      7          
+
+   \                                 In section .far_func.text, align 1
+      8          void spiInit(void)
+      9          {
+     10          	SPI_DeInit(SPI1);
+   \                     spiInit:
+   \   000000 AE 5200      LDW       X, #0x5200
+   \   000003 8D ......    CALLF     SPI_DeInit
+     11          	GPIO_Init(RF_SDN_PORT, RF_SDN_PIN| RF_NSEL_PIN|RF_SCLK_PIN|RF_SDI_PIN, GPIO_Mode_Out_PP_High_Fast);
+   \   000007 35 F0 ....   MOV       S:?b0, #0xf0
+   \   00000B A6 78        LD        A, #0x78
+   \   00000D AE 5005      LDW       X, #0x5005
+   \   000010 8D ......    CALLF     GPIO_Init
+     12          	GPIO_Init(RF_SDO_PORT, RF_SDO_PIN, GPIO_Mode_In_PU_No_IT);
+   \   000014 35 40 ....   MOV       S:?b0, #0x40
+   \   000018 A6 80        LD        A, #0x80
+   \   00001A AE 5005      LDW       X, #0x5005
+   \   00001D 8D ......    CALLF     GPIO_Init
+     13          	/* Enable SPI clock */
+     14          	CLK_PeripheralClockConfig(CLK_Peripheral_SPI1, ENABLE);
+   \   000021 35 01 ....   MOV       S:?b0, #0x1
+   \   000025 A6 04        LD        A, #0x4
+   \   000027 8D ......    CALLF     CLK_PeripheralClockConfig
+     15          	/* Set the MOSI,MISO and SCK at high level */
+     16          	GPIO_ExternalPullUpConfig(GPIOB, RF_SCLK_PIN|RF_SDI_PIN|RF_SDO_PIN, ENABLE);
+   \   00002B 35 01 ....   MOV       S:?b0, #0x1
+   \   00002F A6 E0        LD        A, #0xe0
+   \   000031 AE 5005      LDW       X, #0x5005
+   \   000034 8D ......    CALLF     GPIO_ExternalPullUpConfig
+     17          
+     18          	/* SD_SPI Config */
+     19          	SPI_Init(SPI1, SPI_FirstBit_MSB, SPI_BaudRatePrescaler_2, SPI_Mode_Master,
+     20          	         SPI_CPOL_Low, SPI_CPHA_1Edge, SPI_Direction_2Lines_FullDuplex,
+     21          	         SPI_NSS_Soft, 0x07);
+   \   000038 35 07 ....   MOV       S:?b6, #0x7
+   \   00003C 35 02 ....   MOV       S:?b5, #0x2
+   \   000040 3F ..        CLR       S:?b4
+   \   000042 3F ..        CLR       S:?b3
+   \   000044 3F ..        CLR       S:?b2
+   \   000046 35 04 ....   MOV       S:?b1, #0x4
+   \   00004A 3F ..        CLR       S:?b0
+   \   00004C 4F           CLR       A
+   \   00004D AE 5200      LDW       X, #0x5200
+   \   000050 8D ......    CALLF     SPI_Init
+     22          	/* SD_SPI enable */
+     23          	SPI_Cmd(SPI1, ENABLE);	
+   \   000054 A6 01        LD        A, #0x1
+   \   000056 AE 5200      LDW       X, #0x5200
+   \   000059 AC ......    JPF       SPI_Cmd
+     24          }
+     25          
+
+   \                                 In section .far_func.text, align 1
+     26          void spiIoShutdown(void)
+     27          {
+     28          	SPI_Cmd(SPI1, DISABLE);
+   \                     spiIoShutdown:
+   \   000000 4F           CLR       A
+   \   000001 AE 5200      LDW       X, #0x5200
+   \   000004 8D ......    CALLF     SPI_Cmd
+     29          	CLK_PeripheralClockConfig(CLK_Peripheral_SPI1, DISABLE);
+   \   000008 3F ..        CLR       S:?b0
+   \   00000A A6 04        LD        A, #0x4
+   \   00000C 8D ......    CALLF     CLK_PeripheralClockConfig
+     30          	/* Set the MOSI,MISO and SCK at high level */
+     31          	//GPIO_ExternalPullUpConfig(GPIOB, GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7, DISABLE);
+     32          	//GPIO_Init(GPIOB, GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7 , GPIO_Mode_In_PU_No_IT);
+     33          	GPIO_ExternalPullUpConfig(RF_SDO_PORT, RF_SCLK_PIN|RF_SDI_PIN|RF_SDO_PIN, DISABLE);
+   \   000010 3F ..        CLR       S:?b0
+   \   000012 A6 E0        LD        A, #0xe0
+   \   000014 AE 5005      LDW       X, #0x5005
+   \   000017 8D ......    CALLF     GPIO_ExternalPullUpConfig
+     34          	GPIO_Init(RF_SDO_PORT, RF_NSEL_PIN|RF_SCLK_PIN|RF_SDI_PIN|RF_SDO_PIN , GPIO_Mode_In_PU_No_IT);
+   \   00001B 35 40 ....   MOV       S:?b0, #0x40
+   \   00001F A6 F0        LD        A, #0xf0
+   \   000021 AE 5005      LDW       X, #0x5005
+   \   000024 AC ......    JPF       GPIO_Init
+     35          }
+     36          
+     37          
+
+   \                                 In section .far_func.text, align 1
+     38          u_char SPI_SendByteData(u_char ubData)  
+     39          {       
+   \                     SPI_SendByteData:
+   \   000000 3B ....      PUSH      S:?b8
+   \   000003 B7 ..        LD        S:?b8, A
+     40          	/*!< Wait until the transmit buffer is empty */
+     41          	while(SPI_GetFlagStatus(SPI1, SPI_FLAG_TXE) == RESET);
+   \                     ??SPI_SendByteData_0:
+   \   000005 A6 02        LD        A, #0x2
+   \   000007 AE 5200      LDW       X, #0x5200
+   \   00000A 8D ......    CALLF     SPI_GetFlagStatus
+   \   00000E A1 00        CP        A, #0x0
+   \   000010 27 F3        JREQ      L:??SPI_SendByteData_0
+     42          
+     43          	/*!< Send the byte */
+     44          	SPI_SendData(SPI1, ubData);
+   \   000012 B6 ..        LD        A, S:?b8
+   \   000014 AE 5200      LDW       X, #0x5200
+   \   000017 8D ......    CALLF     SPI_SendData
+     45          
+     46          	/*!< Wait to receive a byte*/
+     47          	while(SPI_GetFlagStatus(SPI1, SPI_FLAG_RXNE) == RESET);
+   \                     ??SPI_SendByteData_1:
+   \   00001B A6 01        LD        A, #0x1
+   \   00001D AE 5200      LDW       X, #0x5200
+   \   000020 8D ......    CALLF     SPI_GetFlagStatus
+   \   000024 A1 00        CP        A, #0x0
+   \   000026 27 F3        JREQ      L:??SPI_SendByteData_1
+     48          
+     49          	/*!< Return the byte read from the SPI bus */
+     50          	return SPI_ReceiveData(SPI1);                       
+   \   000028 AE 5200      LDW       X, #0x5200
+   \   00002B 8D ......    CALLF     SPI_ReceiveData
+   \   00002F 32 ....      POP       S:?b8
+   \   000032 87           RETF
+     51          }
+     52          
+     53          
+     54          /*!
+     55           * This function is used to send data over SPI port (target: EzRadioPRO).no response expected.
+     56           *
+     57           *  @param[in] biDataInLength  The length of the data.
+     58           *  @param[in] *pabiDataIn     Pointer to the first element of the data.
+     59           *
+     60           *  @return None
+     61           */
+
+   \                                 In section .far_func.text, align 1
+     62          void SpiWriteDataBurst(uint8_t biDataInLength, uint8_t *pabiDataIn)
+     63          {
+   \                     SpiWriteDataBurst:
+   \   000000 8D ......    CALLF     L:?push_w4
+   \   000004 3B ....      PUSH      S:?b10
+   \   000007 B7 ..        LD        S:?b10, A
+   \   000009 BF ..        LDW       S:?w4, X
+   \   00000B 20 0C        JRA       L:??SpiWriteDataBurst_0
+     64          	while (biDataInLength--) 
+     65          	{
+     66          		SPI_SendByteData(*pabiDataIn++);
+   \                     ??SpiWriteDataBurst_1:
+   \   00000D 92C6 ..      LD        A, [S:?w4.w]
+   \   000010 8D ......    CALLF     SPI_SendByteData
+   \   000014 BE ..        LDW       X, S:?w4
+   \   000016 5C           INCW      X
+   \   000017 BF ..        LDW       S:?w4, X
+     67          	}
+   \                     ??SpiWriteDataBurst_0:
+   \   000019 45 .. ..     MOV       S:?b0, S:?b10
+   \   00001C B6 ..        LD        A, S:?b0
+   \   00001E AB FF        ADD       A, #0xff
+   \   000020 B7 ..        LD        S:?b10, A
+   \   000022 3D ..        TNZ       S:?b0
+   \   000024 26 E7        JRNE      L:??SpiWriteDataBurst_1
+     68          }
+   \   000026 32 ....      POP       S:?b10
+   \   000029 AC ......    JPF       L:?epilogue_w4
+     69          
+     70          
+     71          /*!
+     72           * This function is used to read data from SPI port.(target: EzRadioPRO).
+     73           *
+     74           *  \param[in] biDataOutLength  The length of the data.
+     75           *  \param[out] *paboDataOut    Pointer to the first element of the response.
+     76           *
+     77           *  \return None
+     78           */
+
+   \                                 In section .far_func.text, align 1
+     79          void SpiReadDataBurst(uint8_t biDataOutLength, uint8_t *paboDataOut)
+     80          {
+   \                     SpiReadDataBurst:
+   \   000000 8D ......    CALLF     L:?push_w4
+   \   000004 3B ....      PUSH      S:?b10
+   \   000007 B7 ..        LD        S:?b10, A
+   \   000009 BF ..        LDW       S:?w4, X
+   \   00000B 20 0E        JRA       L:??SpiReadDataBurst_0
+     81          	// send command and get response from the radio IC
+     82          	while (biDataOutLength--) 
+     83          	{
+     84          		*paboDataOut++ = SPI_SendByteData(0xff);
+   \                     ??SpiReadDataBurst_1:
+   \   00000D A6 FF        LD        A, #0xff
+   \   00000F 8D ......    CALLF     SPI_SendByteData
+   \   000013 92C7 ..      LD        [S:?w4.w], A
+   \   000016 BE ..        LDW       X, S:?w4
+   \   000018 5C           INCW      X
+   \   000019 BF ..        LDW       S:?w4, X
+     85          	}
+   \                     ??SpiReadDataBurst_0:
+   \   00001B 45 .. ..     MOV       S:?b0, S:?b10
+   \   00001E B6 ..        LD        A, S:?b0
+   \   000020 AB FF        ADD       A, #0xff
+   \   000022 B7 ..        LD        S:?b10, A
+   \   000024 3D ..        TNZ       S:?b0
+   \   000026 26 E5        JRNE      L:??SpiReadDataBurst_1
+     86          }
+   \   000028 32 ....      POP       S:?b10
+   \   00002B AC ......    JPF       L:?epilogue_w4
+     87          
+     88          
+     89          
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      51  SPI_SendByteData
+      47  SpiReadDataBurst
+      45  SpiWriteDataBurst
+      93  spiInit
+      40  spiIoShutdown
+
+ 
+ 276 bytes in section .far_func.text
+ 
+ 276 bytes of CODE memory
+
+Errors: none
+Warnings: 4

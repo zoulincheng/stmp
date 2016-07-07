@@ -1,0 +1,571 @@
+###############################################################################
+#                                                                             #
+# IAR C/C++ Compiler V1.42.1.142 for STM8               01/Jul/2016  17:52:20 #
+# Copyright 2010-2013 IAR Systems AB.                                         #
+#                                                                             #
+#    Source file  =  E:\hwpro-2016\20160627_L\app\events.c                    #
+#    Command line =  E:\hwpro-2016\20160627_L\app\events.c -e -Ol --no_cse    #
+#                    --no_unroll --no_inline --no_code_motion --no_tbaa       #
+#                    --no_cross_call --debug --code_model medium              #
+#                    --data_model medium -o E:\hwpro-2016\20160627_L\iar\Debu #
+#                    g\Obj\ --dlib_config "C:\Program Files (x86)\IAR         #
+#                    Systems\Embedded Workbench 6.5\stm8\LIB\dlstm8mmn.h" -D  #
+#                    STM8L15X_MD -lC E:\hwpro-2016\20160627_L\iar\Debug\List\ #
+#                     -I E:\hwpro-2016\20160627_L\iar\..\stm8l15x_lib\inc\    #
+#                    -I E:\hwpro-2016\20160627_L\iar\..\user\inc\ -I          #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\xprintf\ -I        #
+#                    E:\hwpro-2016\20160627_L\iar\..\drivers\ -I              #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\ -I                #
+#                    E:\hwpro-2016\20160627_L\iar\..\app\ --vregs 16          #
+#    List file    =  E:\hwpro-2016\20160627_L\iar\Debug\List\events.lst       #
+#    Object file  =  E:\hwpro-2016\20160627_L\iar\Debug\Obj\events.o          #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+E:\hwpro-2016\20160627_L\app\events.c
+      1          #include "stm8l15x.h"
+      2          #include "basictype.h"
+
+  typedef unsigned char 	  uint8_t;
+                        	  ^
+"E:\hwpro-2016\20160627_L\user\inc\basictype.h",8  Warning[Pe301]: typedef
+          name has already been declared (with same type)
+
+  typedef unsigned short	  uint16_t;
+                        	  ^
+"E:\hwpro-2016\20160627_L\user\inc\basictype.h",10  Warning[Pe301]: typedef
+          name has already been declared (with same type)
+
+  typedef unsigned char     u8;
+                            ^
+"E:\hwpro-2016\20160627_L\user\inc\basictype.h",16  Warning[Pe301]: typedef
+          name has already been declared (with same type)
+
+  typedef unsigned short    u16;
+                            ^
+"E:\hwpro-2016\20160627_L\user\inc\basictype.h",17  Warning[Pe301]: typedef
+          name has already been declared (with same type)
+      3          #include "chain.h"
+      4          #include "events.h"
+      5          
+
+   \                                 In section .near.bss, align 1
+      6          NODE nIRQ_node;
+   \                     nIRQ_node:
+   \   000000              DS8 6
+
+   \                                 In section .near.bss, align 1
+      7          NODE tx_node;
+   \                     tx_node:
+   \   000000              DS8 6
+
+   \                                 In section .near.bss, align 1
+      8          NODE tx_check_node;
+   \                     tx_check_node:
+   \   000000              DS8 6
+
+   \                                 In section .near.bss, align 1
+      9          NODE update_time_node;
+   \                     update_time_node:
+   \   000000              DS8 6
+
+   \                                 In section .near.bss, align 1
+     10          NODE rx_timeout_node;
+   \                     rx_timeout_node:
+   \   000000              DS8 6
+
+   \                                 In section .near.bss, align 1
+     11          NODE data_req_restore;
+   \                     data_req_restore:
+   \   000000              DS8 6
+
+   \                                 In section .near.bss, align 1
+     12          NODE rssi_node;
+   \                     rssi_node:
+   \   000000              DS8 6
+
+   \                                 In section .near.bss, align 1
+     13          NODE data_req;
+   \                     data_req:
+   \   000000              DS8 6
+
+   \                                 In section .near.bss, align 1
+     14          NODE heart_beat;
+   \                     heart_beat:
+   \   000000              DS8 6
+
+   \                                 In section .near.bss, align 1
+     15          NODE i2c;
+   \                     i2c:
+   \   000000              DS8 6
+     16          //NODE preamble_node;
+     17          // for app
+
+   \                                 In section .near.bss, align 1
+     18          NODE app_pkt_pro;
+   \                     app_pkt_pro:
+   \   000000              DS8 6
+
+   \                                 In section .near.bss, align 1
+     19          NODE check_nirq;
+   \                     check_nirq:
+   \   000000              DS8 6
+
+   \                                 In section .near.bss, align 1
+     20          NODE network_init;
+   \                     network_init:
+   \   000000              DS8 6
+
+   \                                 In section .near.bss, align 1
+     21          NODE wait_father_rep;
+   \                     wait_father_rep:
+   \   000000              DS8 6
+
+   \                                 In section .near.bss, align 1
+     22          NODE network_search;
+   \                     network_search:
+   \   000000              DS8 6
+     23          
+     24          #ifdef DEBUG_FLAG
+     25          NODE debug_node;
+     26          #endif
+     27          
+     28          
+
+   \                                 In section .near.bss, align 1
+     29          volatile EVENT events = 0;
+   \                     events:
+   \   000000              DS8 2
+
+   \                                 In section .near.bss, align 1
+     30          volatile u16 interrupt_events = 0;
+   \                     interrupt_events:
+   \   000000              DS8 2
+     31          
+
+   \                                 In section .far_func.text, align 1
+     32          u8 set_event( EVENT event_flag )
+     33          {
+     34          	//  disableInterrupts();    // Hold off interrupts
+     35          	events |= event_flag;  // Stuff the event bit(s)
+   \                     set_event:
+   \   000000 90CE ....    LDW       Y, L:events
+   \   000004 BF ..        LDW       S:?w0, X
+   \   000006 51           EXGW      X, Y
+   \   000007 01           RRWA      X, A
+   \   000008 BA ..        OR        A, S:?b1
+   \   00000A 01           RRWA      X, A
+   \   00000B BA ..        OR        A, S:?b0
+   \   00000D 01           RRWA      X, A
+   \   00000E 51           EXGW      X, Y
+   \   00000F 90CF ....    LDW       L:events, Y
+     36          	//  enableInterrupts();     // Release interrupts
+     37          	return ( SUCCESS );
+   \   000013 A6 01        LD        A, #0x1
+   \   000015 87           RETF
+     38          }
+     39          
+
+   \                                 In section .far_func.text, align 1
+     40          void reset_event(void)
+     41          {
+     42          	events = 0;
+   \                     reset_event:
+   \   000000 5F           CLRW      X
+   \   000001 CF ....      LDW       L:events, X
+     43          }
+   \   000004 87           RETF
+     44          
+
+   \                                 In section .far_func.text, align 1
+     45          void poll_event(void)
+     46          {
+   \                     poll_event:
+   \   000000 20 0D        JRA       L:??poll_event_0
+     47          	while(events)
+     48          	{
+     49          		if(events & E_nIRQ)
+     50          		{
+     51          			events &= ~(E_nIRQ);
+   \                     ??poll_event_1:
+   \   000002 CE ....      LDW       X, L:events
+   \   000005 02           RLWA      X, A
+   \   000006 A4 FF        AND       A, #0xff
+   \   000008 02           RLWA      X, A
+   \   000009 A4 FE        AND       A, #0xfe
+   \   00000B 02           RLWA      X, A
+   \   00000C CF ....      LDW       L:events, X
+     52          		}
+   \                     ??poll_event_0:
+   \   00000F CE ....      LDW       X, L:events
+   \   000012 5D           TNZW      X
+   \   000013 26 03        JRNE      ??lb_0
+   \   000015 CC ....      JP        L:??poll_event_2
+   \                     ??lb_0:
+   \   000018 CE ....      LDW       X, L:events
+   \   00001B 9F           LD        A, XL
+   \   00001C A4 01        AND       A, #0x1
+   \   00001E A1 00        CP        A, #0x0
+   \   000020 26 E0        JRNE      L:??poll_event_1
+     53          		#ifdef I2C_COM
+     54          		else if(events & E_I2C_INT)
+     55          		{
+     56          			events &= ~(E_I2C_INT);
+     57          		}
+     58          		#endif
+     59          		else if(events & E_UPDATE_TIME)
+   \   000022 CE ....      LDW       X, L:events
+   \   000025 9F           LD        A, XL
+   \   000026 A4 04        AND       A, #0x4
+   \   000028 A1 00        CP        A, #0x0
+   \   00002A 27 0F        JREQ      L:??poll_event_3
+     60          		{
+     61          			events &= ~(E_UPDATE_TIME);
+   \   00002C CE ....      LDW       X, L:events
+   \   00002F 02           RLWA      X, A
+   \   000030 A4 FF        AND       A, #0xff
+   \   000032 02           RLWA      X, A
+   \   000033 A4 FB        AND       A, #0xfb
+   \   000035 02           RLWA      X, A
+   \   000036 CF ....      LDW       L:events, X
+   \   000039 20 D4        JRA       L:??poll_event_0
+     62          		}
+     63          		else if(events & E_rx_timeout)
+   \                     ??poll_event_3:
+   \   00003B CE ....      LDW       X, L:events
+   \   00003E 9F           LD        A, XL
+   \   00003F A4 20        AND       A, #0x20
+   \   000041 A1 00        CP        A, #0x0
+   \   000043 27 0F        JREQ      L:??poll_event_4
+     64          		{
+     65          			events &= ~(E_rx_timeout);
+   \   000045 CE ....      LDW       X, L:events
+   \   000048 02           RLWA      X, A
+   \   000049 A4 FF        AND       A, #0xff
+   \   00004B 02           RLWA      X, A
+   \   00004C A4 DF        AND       A, #0xdf
+   \   00004E 02           RLWA      X, A
+   \   00004F CF ....      LDW       L:events, X
+   \   000052 20 BB        JRA       L:??poll_event_0
+     66          		}
+     67          		else if(events & E_tx_check)
+   \                     ??poll_event_4:
+   \   000054 CE ....      LDW       X, L:events
+   \   000057 9F           LD        A, XL
+   \   000058 A4 10        AND       A, #0x10
+   \   00005A A1 00        CP        A, #0x0
+   \   00005C 27 0F        JREQ      L:??poll_event_5
+     68          		{
+     69          			events &= ~(E_tx_check);
+   \   00005E CE ....      LDW       X, L:events
+   \   000061 02           RLWA      X, A
+   \   000062 A4 FF        AND       A, #0xff
+   \   000064 02           RLWA      X, A
+   \   000065 A4 EF        AND       A, #0xef
+   \   000067 02           RLWA      X, A
+   \   000068 CF ....      LDW       L:events, X
+   \   00006B 20 A2        JRA       L:??poll_event_0
+     70          		}
+     71          		else if(events & E_tx)
+   \                     ??poll_event_5:
+   \   00006D CE ....      LDW       X, L:events
+   \   000070 9F           LD        A, XL
+   \   000071 A4 02        AND       A, #0x2
+   \   000073 A1 00        CP        A, #0x0
+   \   000075 27 0F        JREQ      L:??poll_event_6
+     72          		{
+     73          			events &= ~(E_tx);
+   \   000077 CE ....      LDW       X, L:events
+   \   00007A 02           RLWA      X, A
+   \   00007B A4 FF        AND       A, #0xff
+   \   00007D 02           RLWA      X, A
+   \   00007E A4 FD        AND       A, #0xfd
+   \   000080 02           RLWA      X, A
+   \   000081 CF ....      LDW       L:events, X
+   \   000084 20 89        JRA       L:??poll_event_0
+     74          		}
+     75          		else if(events & E_rssi)
+   \                     ??poll_event_6:
+   \   000086 CE ....      LDW       X, L:events
+   \   000089 9F           LD        A, XL
+   \   00008A A4 40        AND       A, #0x40
+   \   00008C A1 00        CP        A, #0x0
+   \   00008E 27 10        JREQ      L:??poll_event_7
+     76          		{
+     77          			events &= ~(E_rssi);
+   \   000090 CE ....      LDW       X, L:events
+   \   000093 02           RLWA      X, A
+   \   000094 A4 FF        AND       A, #0xff
+   \   000096 02           RLWA      X, A
+   \   000097 A4 BF        AND       A, #0xbf
+   \   000099 02           RLWA      X, A
+   \   00009A CF ....      LDW       L:events, X
+   \   00009D CC ....      JP        L:??poll_event_0
+     78          		}
+     79          		else if(events & E_data_req)
+   \                     ??poll_event_7:
+   \   0000A0 CE ....      LDW       X, L:events
+   \   0000A3 9F           LD        A, XL
+   \   0000A4 A4 80        AND       A, #0x80
+   \   0000A6 A1 00        CP        A, #0x0
+   \   0000A8 27 10        JREQ      L:??poll_event_8
+     80          		{
+     81          			events &= ~(E_data_req);
+   \   0000AA CE ....      LDW       X, L:events
+   \   0000AD 02           RLWA      X, A
+   \   0000AE A4 FF        AND       A, #0xff
+   \   0000B0 02           RLWA      X, A
+   \   0000B1 A4 7F        AND       A, #0x7f
+   \   0000B3 02           RLWA      X, A
+   \   0000B4 CF ....      LDW       L:events, X
+   \   0000B7 CC ....      JP        L:??poll_event_0
+     82          		}
+     83          		else if(events & E_HeartBeat)
+   \                     ??poll_event_8:
+   \   0000BA CE ....      LDW       X, L:events
+   \   0000BD 02           RLWA      X, A
+   \   0000BE A4 01        AND       A, #0x1
+   \   0000C0 02           RLWA      X, A
+   \   0000C1 A4 00        AND       A, #0x0
+   \   0000C3 02           RLWA      X, A
+   \   0000C4 5D           TNZW      X
+   \   0000C5 27 10        JREQ      L:??poll_event_9
+     84          		{
+     85          			events &= ~(E_HeartBeat);
+   \   0000C7 CE ....      LDW       X, L:events
+   \   0000CA 02           RLWA      X, A
+   \   0000CB A4 FE        AND       A, #0xfe
+   \   0000CD 02           RLWA      X, A
+   \   0000CE A4 FF        AND       A, #0xff
+   \   0000D0 02           RLWA      X, A
+   \   0000D1 CF ....      LDW       L:events, X
+   \   0000D4 CC ....      JP        L:??poll_event_0
+     86          		}
+     87          		// for app
+     88          		else if(events & E_app_pkt_process)
+   \                     ??poll_event_9:
+   \   0000D7 CE ....      LDW       X, L:events
+   \   0000DA 02           RLWA      X, A
+   \   0000DB A4 04        AND       A, #0x4
+   \   0000DD 02           RLWA      X, A
+   \   0000DE A4 00        AND       A, #0x0
+   \   0000E0 02           RLWA      X, A
+   \   0000E1 5D           TNZW      X
+   \   0000E2 27 10        JREQ      L:??poll_event_10
+     89          		{
+     90          			events &= ~(E_app_pkt_process);
+   \   0000E4 CE ....      LDW       X, L:events
+   \   0000E7 02           RLWA      X, A
+   \   0000E8 A4 FB        AND       A, #0xfb
+   \   0000EA 02           RLWA      X, A
+   \   0000EB A4 FF        AND       A, #0xff
+   \   0000ED 02           RLWA      X, A
+   \   0000EE CF ....      LDW       L:events, X
+   \   0000F1 CC ....      JP        L:??poll_event_0
+     91          		}
+     92          		else if(events & E_DATA_REQ_RESTORE)
+   \                     ??poll_event_10:
+   \   0000F4 CE ....      LDW       X, L:events
+   \   0000F7 02           RLWA      X, A
+   \   0000F8 A4 80        AND       A, #0x80
+   \   0000FA 02           RLWA      X, A
+   \   0000FB A4 00        AND       A, #0x0
+   \   0000FD 02           RLWA      X, A
+   \   0000FE 5D           TNZW      X
+   \   0000FF 27 10        JREQ      L:??poll_event_11
+     93          		{
+     94          			events &= ~(E_DATA_REQ_RESTORE);
+   \   000101 CE ....      LDW       X, L:events
+   \   000104 02           RLWA      X, A
+   \   000105 A4 7F        AND       A, #0x7f
+   \   000107 02           RLWA      X, A
+   \   000108 A4 FF        AND       A, #0xff
+   \   00010A 02           RLWA      X, A
+   \   00010B CF ....      LDW       L:events, X
+   \   00010E CC ....      JP        L:??poll_event_0
+     95          		}
+     96          		#ifdef I2C_COM
+     97          		else if(events & E_I2C)
+     98          		{
+     99          			events &= ~E_I2C;
+    100          		}
+    101          		#endif
+    102          		else if(events & E_NETWORK_INIT)
+   \                     ??poll_event_11:
+   \   000111 CE ....      LDW       X, L:events
+   \   000114 02           RLWA      X, A
+   \   000115 A4 10        AND       A, #0x10
+   \   000117 02           RLWA      X, A
+   \   000118 A4 00        AND       A, #0x0
+   \   00011A 02           RLWA      X, A
+   \   00011B 5D           TNZW      X
+   \   00011C 27 10        JREQ      L:??poll_event_12
+    103          		{
+    104          			events &= ~E_NETWORK_INIT;
+   \   00011E CE ....      LDW       X, L:events
+   \   000121 02           RLWA      X, A
+   \   000122 A4 EF        AND       A, #0xef
+   \   000124 02           RLWA      X, A
+   \   000125 A4 FF        AND       A, #0xff
+   \   000127 02           RLWA      X, A
+   \   000128 CF ....      LDW       L:events, X
+   \   00012B CC ....      JP        L:??poll_event_0
+    105          		}
+    106          		else if(events & E_NETWORK_SEARCH)
+   \                     ??poll_event_12:
+   \   00012E CE ....      LDW       X, L:events
+   \   000131 02           RLWA      X, A
+   \   000132 A4 40        AND       A, #0x40
+   \   000134 02           RLWA      X, A
+   \   000135 A4 00        AND       A, #0x0
+   \   000137 02           RLWA      X, A
+   \   000138 5D           TNZW      X
+   \   000139 27 10        JREQ      L:??poll_event_13
+    107          		{
+    108          			events &= ~(E_NETWORK_SEARCH);
+   \   00013B CE ....      LDW       X, L:events
+   \   00013E 02           RLWA      X, A
+   \   00013F A4 BF        AND       A, #0xbf
+   \   000141 02           RLWA      X, A
+   \   000142 A4 FF        AND       A, #0xff
+   \   000144 02           RLWA      X, A
+   \   000145 CF ....      LDW       L:events, X
+   \   000148 CC ....      JP        L:??poll_event_0
+    109          		}
+    110          		else
+    111          		{
+    112          			events = 0;
+   \                     ??poll_event_13:
+   \   00014B 5F           CLRW      X
+   \   00014C CF ....      LDW       L:events, X
+   \   00014F CC ....      JP        L:??poll_event_0
+    113          		}
+    114          	}
+    115          }
+   \                     ??poll_event_2:
+   \   000152 87           RETF
+    116          
+
+   \                                 In section .far_func.text, align 1
+    117          void Set_Int_Event( u16 flag )
+    118          { 
+    119            interrupt_events |= flag;
+   \                     Set_Int_Event:
+   \   000000 90CE ....    LDW       Y, L:interrupt_events
+   \   000004 BF ..        LDW       S:?w0, X
+   \   000006 51           EXGW      X, Y
+   \   000007 01           RRWA      X, A
+   \   000008 BA ..        OR        A, S:?b1
+   \   00000A 01           RRWA      X, A
+   \   00000B BA ..        OR        A, S:?b0
+   \   00000D 01           RRWA      X, A
+   \   00000E 51           EXGW      X, Y
+   \   00000F 90CF ....    LDW       L:interrupt_events, Y
+    120          }
+   \   000013 87           RETF
+    121          
+
+   \                                 In section .far_func.text, align 1
+    122          u16 check_Int( void )
+    123          { 
+    124          	return interrupt_events;
+   \                     check_Int:
+   \   000000 CE ....      LDW       X, L:interrupt_events
+   \   000003 87           RETF
+    125          }
+    126          
+    127          
+
+   \                                 In section .far_func.text, align 1
+    128          void Int_to_events( void )
+    129          {
+    130          	//disableInterrupts();
+    131              if( interrupt_events & SPI_INT )
+   \                     Int_to_events:
+   \   000000 CE ....      LDW       X, L:interrupt_events
+   \   000003 9F           LD        A, XL
+   \   000004 A4 01        AND       A, #0x1
+   \   000006 A1 00        CP        A, #0x0
+   \   000008 27 0D        JREQ      L:??Int_to_events_0
+    132              {
+    133          		//set_event(E_nIRQ);
+    134          		interrupt_events &= ~SPI_INT;
+   \   00000A CE ....      LDW       X, L:interrupt_events
+   \   00000D 02           RLWA      X, A
+   \   00000E A4 FF        AND       A, #0xff
+   \   000010 02           RLWA      X, A
+   \   000011 A4 FE        AND       A, #0xfe
+   \   000013 02           RLWA      X, A
+   \   000014 CF ....      LDW       L:interrupt_events, X
+    135              }
+    136          	if( interrupt_events & RTC_INT )
+   \                     ??Int_to_events_0:
+   \   000017 CE ....      LDW       X, L:interrupt_events
+   \   00001A 9F           LD        A, XL
+   \   00001B A4 02        AND       A, #0x2
+   \   00001D A1 00        CP        A, #0x0
+   \   00001F 27 14        JREQ      L:??Int_to_events_1
+    137              {
+    138          		set_event(E_UPDATE_TIME);
+   \   000021 AE 0004      LDW       X, #0x4
+   \   000024 8D ......    CALLF     set_event
+    139          		interrupt_events &= ~RTC_INT;
+   \   000028 CE ....      LDW       X, L:interrupt_events
+   \   00002B 02           RLWA      X, A
+   \   00002C A4 FF        AND       A, #0xff
+   \   00002E 02           RLWA      X, A
+   \   00002F A4 FD        AND       A, #0xfd
+   \   000031 02           RLWA      X, A
+   \   000032 CF ....      LDW       L:interrupt_events, X
+    140              }
+    141          	#ifdef I2C_COM
+    142              if( interrupt_events & I2C_INT )
+    143              {
+    144          		set_event(E_I2C_INT);
+    145          		interrupt_events &= ~I2C_INT;
+    146              }
+    147          	#endif
+    148          	//enableInterrupts();	
+    149          }
+   \                     ??Int_to_events_1:
+   \   000035 87           RETF
+    150          
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      54  Int_to_events
+      20  Set_Int_Event
+       6  app_pkt_pro
+       4  check_Int
+       6  check_nirq
+       6  data_req
+       6  data_req_restore
+       2  events
+       6  heart_beat
+       6  i2c
+       2  interrupt_events
+       6  nIRQ_node
+       6  network_init
+       6  network_search
+     339  poll_event
+       5  reset_event
+       6  rssi_node
+       6  rx_timeout_node
+      22  set_event
+       6  tx_check_node
+       6  tx_node
+       6  update_time_node
+       6  wait_father_rep
+
+ 
+ 444 bytes in section .far_func.text
+  94 bytes in section .near.bss
+ 
+ 444 bytes of CODE memory
+  94 bytes of DATA memory
+
+Errors: none
+Warnings: 4

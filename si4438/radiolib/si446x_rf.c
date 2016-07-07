@@ -28,22 +28,21 @@ static int si446x_radio_off(void);
 static int add_to_rxbuf(uint8_t * src);
 static int read_from_rxbuf(void *dest, unsigned short len);
 
-#define SI446X_ACK_154_LEN		11
-#define SI446X_MAX_PACKET_LEN	126
-#define SI446X_CUR_RSSI			128
+#define SI446X_MAX_PACKET_LEN	32
+#define SI446X_CUR_RSSI			31
 
 /*
  * The buffers which hold incoming data.
  */
 #ifndef SI446X_RADIO_RXBUFS
-#define SI446X_RADIO_RXBUFS 1
+#define SI446X_RADIO_RXBUFS 4
 #endif 
 
 
 /* +1 because of the first byte, which will contain the length of the packet. */
 // +1 last data is rssi
 //len1 [data] rssi1
-static uint8_t si446x_rxbufs[SI446X_RADIO_RXBUFS][SI446X_MAX_PACKET_LEN + 1 + 1+ 1];//len1 [data] rssi1  last_rssi
+static uint8_t si446x_rxbufs[SI446X_RADIO_RXBUFS][SI446X_MAX_PACKET_LEN];//len1 [data] rssi1  last_rssi
 
 
 #if SI446X_RADIO_RXBUFS > 1
@@ -67,15 +66,12 @@ static int RXBUFS_FULL( )
 #define RXBUFS_FULL( ) (si446x_rxbufs[0][0] != 0)
 #endif 
 
-static uint8_t si446x_txbuf[SI446X_MAX_PACKET_LEN + 1 + 1];//128Bytes
+static uint8_t si446x_txbuf[SI446X_MAX_PACKET_LEN];
 
 #define CLEAN_TXBUF() (si446x_txbuf[0] = 0)
 #define TXBUF_EMPTY() (si446x_txbuf[0] == 0)
 
 #define BUSYWAIT_UNTIL(cond, max_time)
-
-static volatile uint8_t onoroff = 0;//OFF;
-static volatile int8_t last_rssi;
 
 static u_char ubcurrssi;
 static uint8_t locked;
@@ -119,7 +115,7 @@ static void RELEASE_LOCK(void)
 static int si446x_radio_rf_init(void)
 {
 	si446xRadioInit( );
-	onoroff = 0;//OFF;
+	
 	locked = 0;
 	si446x_state = SI446X_IDLE;
 
@@ -154,7 +150,6 @@ static int si446x_radio_transmit(unsigned short payload_len)
 	{
 		#if  DEBUGTEST > 0
 		{
-			XPRINTF((10, "Tx clock_end is %d\r\n", clock_time( )));
 			MEM_DUMP(10, "TX->",(u_char*)si446x_txbuf, si446x_txbuf[0]+1);
 		}
 		#endif
@@ -273,7 +268,7 @@ static int si446x_radio_pending_packet(void)
 /*---------------------------------------------------------------------------*/
 int si446x_radio_is_on(void)
 {
-  return onoroff == 1;//ON;
+  return 0;
 }
 
 
@@ -329,7 +324,6 @@ static int read_from_rxbuf(void *dest, unsigned short len)
 		len = si446x_rxbufs[first][0]-2;
 		packet_rssi = si446x_rxbufs[first][SI446X_CUR_RSSI];
 		rssi = -((int8_t)((0xff-packet_rssi)>>1));
-		XPRINTF((10, "prssi %d last_rssi %d  rssi %d\r\n", packet_rssi, last_rssi, rssi));
 		//memcpy(dest, (uint8_t*)&si446x_rxbufs[first][0] + 1, len);
 		memcpy(dest, (uint8_t*)&si446x_rxbufs[first][0] + 1, len);
 		//packetbuf_set_attr(PACKETBUF_ATTR_RSSI, last_rssi);
@@ -404,7 +398,7 @@ void static modem_syde_handler(void)
 	//u_char ubrssi = 0;
 	si446x_get_modem_status(0x00);
 	ubcurrssi = Si446xCmd.GET_MODEM_STATUS.CURR_RSSI;
-	last_rssi = -((int8_t)((0xff-ubcurrssi)>>1));
+	//last_rssi = -((int8_t)((0xff-ubcurrssi)>>1));
 	//XPRINTF((0, "last_rssi = %d\r\n", last_rssi));
 	ubarxbuf[0] = 0;
 	si446x_state = SI446X_RX;
@@ -436,57 +430,53 @@ INTERRUPT_HANDLER(EXTI4_IRQHandler, 12)
 
 INTERRUPT_HANDLER(EXTI4_IRQHandler, 12)
 {	
+	U8 si446x_ph_pend = 0x00;
+	U8 si446x_modem_pend = 0x00;
+	U8 si446x_chip_pend = 0x00;
+
 	EXTI_ClearITPendingBit(EXTI_IT_Pin4);
 
+	//EXTI_ClearITPendingBit(EXTI_Line6);	
+			
+	si446x_get_int_status( );
+	si446x_ph_pend = Si446xCmd.GET_INT_STATUS.PH_PEND;
+	si446x_modem_pend = Si446xCmd.GET_INT_STATUS.MODEM_PEND;
+	si446x_chip_pend = Si446xCmd.GET_INT_STATUS.CHIP_PEND;
+	
+	//packet sent finish
+	if (si446x_ph_pend& SI446X_INT_CTL_PH_PSENT_EN)//packet sent
 	{
-		U8 si446x_ph_pend = 0x00;
-		U8 si446x_modem_pend = 0x00;
-		U8 si446x_chip_pend = 0x00;
-
-		//EXTI_ClearITPendingBit(EXTI_Line6);	
-				
-		si446x_get_int_status( );
-		si446x_ph_pend = Si446xCmd.GET_INT_STATUS.PH_PEND;
-		si446x_modem_pend = Si446xCmd.GET_INT_STATUS.MODEM_PEND;
-		si446x_chip_pend = Si446xCmd.GET_INT_STATUS.CHIP_PEND;
-		
-		//packet sent finish
-		if (si446x_ph_pend& SI446X_INT_CTL_PH_PSENT_EN)//packet sent
-		{
-			si446x_set_pksent( );
-			//XPRINTF((0, "PH = %02x\r\n", ubph_en));
-			count_tx++;
-		}
-		//packet rx finish
-		if (si446x_ph_pend & SI446X_INT_CTL_PH_PRX_EN)
-		{
-			ph_prx_handler( );
-			count_rx++;
-		}
-		//packet crc error
-		if (si446x_ph_pend & SI446X_INT_CTL_PH_CRCE_EN)
-		{
-			si446x_change_dev_current_state(SI446X_SLEEP);
-			si446xStartRX( );
-		}
-
-		//syde
-		if (si446x_modem_pend & SI446X_INT_CTL_MODEM_SYDE_EN)
-		{
-			modem_syde_handler();
-		}
-
-		//cmd error
-		if (si446x_chip_pend & SI446X_INT_CTL_CHIP_CMERR_EN)
-		{
-			chip_cmderror_handler( );
-			XPRINTF((0, "cmd_error\n"));
-		}
+		si446x_set_pksent( );
+		//XPRINTF((0, "PH = %02x\r\n", ubph_en));
+		count_tx++;
+	}
+	//packet rx finish
+	if (si446x_ph_pend & SI446X_INT_CTL_PH_PRX_EN)
+	{
+		ph_prx_handler( );
+		count_rx++;
+	}
+	//packet crc error
+	if (si446x_ph_pend & SI446X_INT_CTL_PH_CRCE_EN)
+	{
+		si446x_change_dev_current_state(SI446X_SLEEP);
+		si446xStartRX( );
 	}
 
+	//syde
+	if (si446x_modem_pend & SI446X_INT_CTL_MODEM_SYDE_EN)
+	{
+		modem_syde_handler();
+	}
+
+	//cmd error
+	if (si446x_chip_pend & SI446X_INT_CTL_CHIP_CMERR_EN)
+	{
+		chip_cmderror_handler( );
+		XPRINTF((0, "cmd_error\n"));
+	}
 	//Set_Int_Event( SPI_INT );
 }
-
 
 
 /*--------------------------------------------------------------------------*/

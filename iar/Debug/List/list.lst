@@ -1,0 +1,590 @@
+###############################################################################
+#                                                                             #
+# IAR C/C++ Compiler V1.42.1.142 for STM8               01/Jul/2016  17:30:46 #
+# Copyright 2010-2013 IAR Systems AB.                                         #
+#                                                                             #
+#    Source file  =  E:\hwpro-2016\20160627_L\utils\lib\list.c                #
+#    Command line =  E:\hwpro-2016\20160627_L\utils\lib\list.c -e -Ol         #
+#                    --no_cse --no_unroll --no_inline --no_code_motion        #
+#                    --no_tbaa --no_cross_call --debug --code_model medium    #
+#                    --data_model medium -o E:\hwpro-2016\20160627_L\iar\Debu #
+#                    g\Obj\ --dlib_config "C:\Program Files (x86)\IAR         #
+#                    Systems\Embedded Workbench 6.5\stm8\LIB\dlstm8mmn.h" -D  #
+#                    STM8L15X_MD -lC E:\hwpro-2016\20160627_L\iar\Debug\List\ #
+#                     -I E:\hwpro-2016\20160627_L\iar\..\stm8l15x_lib\inc\    #
+#                    -I E:\hwpro-2016\20160627_L\iar\..\user\inc\ -I          #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\xprintf\ -I        #
+#                    E:\hwpro-2016\20160627_L\iar\..\drivers\ -I              #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\ -I                #
+#                    E:\hwpro-2016\20160627_L\iar\..\app\ --vregs 16          #
+#    List file    =  E:\hwpro-2016\20160627_L\iar\Debug\List\list.lst         #
+#    Object file  =  E:\hwpro-2016\20160627_L\iar\Debug\Obj\list.o            #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+E:\hwpro-2016\20160627_L\utils\lib\list.c
+      1          /*
+      2           * Copyright (c) 2004, Swedish Institute of Computer Science.
+      3           * All rights reserved.
+      4           *
+      5           * Redistribution and use in source and binary forms, with or without
+      6           * modification, are permitted provided that the following conditions
+      7           * are met:
+      8           * 1. Redistributions of source code must retain the above copyright
+      9           *    notice, this list of conditions and the following disclaimer.
+     10           * 2. Redistributions in binary form must reproduce the above copyright
+     11           *    notice, this list of conditions and the following disclaimer in the
+     12           *    documentation and/or other materials provided with the distribution.
+     13           * 3. Neither the name of the Institute nor the names of its contributors
+     14           *    may be used to endorse or promote products derived from this software
+     15           *    without specific prior written permission.
+     16           *
+     17           * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+     18           * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+     19           * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+     20           * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+     21           * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+     22           * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+     23           * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+     24           * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+     25           * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+     26           * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+     27           * SUCH DAMAGE.
+     28           *
+     29           * This file is part of the Contiki operating system.
+     30           *
+     31           * Author: Adam Dunkels <adam@sics.se>
+     32           *
+     33           */
+     34          
+     35          /**
+     36           * \file
+     37           * Linked list library implementation.
+     38           *
+     39           * \author Adam Dunkels <adam@sics.se>
+     40           *
+     41           */
+     42          
+     43          /**
+     44           * \addtogroup list
+     45           * @{
+     46           */
+     47          
+     48          #include "lib/list.h"
+     49          
+     50          #define NULL 0
+     51          
+     52          struct list {
+     53            struct list *next;
+     54          };
+     55          
+     56          /*---------------------------------------------------------------------------*/
+     57          /**
+     58           * Initialize a list.
+     59           *
+     60           * This function initalizes a list. The list will be empty after this
+     61           * function has been called.
+     62           *
+     63           * \param list The list to be initialized.
+     64           */
+
+   \                                 In section .far_func.text, align 1
+     65          void
+     66          list_init(list_t list)
+     67          {
+     68            *list = NULL;
+   \                     list_init:
+   \   000000 905F         CLRW      Y
+   \   000002 FF           LDW       (X), Y
+     69          }
+   \   000003 87           RETF
+     70          /*---------------------------------------------------------------------------*/
+     71          /**
+     72           * Get a pointer to the first element of a list.
+     73           *
+     74           * This function returns a pointer to the first element of the
+     75           * list. The element will \b not be removed from the list.
+     76           *
+     77           * \param list The list.
+     78           * \return A pointer to the first element on the list.
+     79           *
+     80           * \sa list_tail()
+     81           */
+
+   \                                 In section .far_func.text, align 1
+     82          void *
+     83          list_head(list_t list)
+     84          {
+     85            return *list;
+   \                     list_head:
+   \   000000 FE           LDW       X, (X)
+   \   000001 87           RETF
+     86          }
+     87          /*---------------------------------------------------------------------------*/
+     88          /**
+     89           * Duplicate a list.
+     90           *
+     91           * This function duplicates a list by copying the list reference, but
+     92           * not the elements.
+     93           *
+     94           * \note This function does \b not copy the elements of the list, but
+     95           * merely duplicates the pointer to the first element of the list.
+     96           *
+     97           * \param dest The destination list.
+     98           * \param src The source list.
+     99           */
+
+   \                                 In section .far_func.text, align 1
+    100          void
+    101          list_copy(list_t dest, list_t src)
+    102          {
+    103            *dest = *src;
+   \                     list_copy:
+   \   000000 90FE         LDW       Y, (Y)
+   \   000002 FF           LDW       (X), Y
+    104          }
+   \   000003 87           RETF
+    105          /*---------------------------------------------------------------------------*/
+    106          /**
+    107           * Get the tail of a list.
+    108           *
+    109           * This function returns a pointer to the elements following the first
+    110           * element of a list. No elements are removed by this function.
+    111           *
+    112           * \param list The list
+    113           * \return A pointer to the element after the first element on the list.
+    114           *
+    115           * \sa list_head()
+    116           */
+
+   \                                 In section .far_func.text, align 1
+    117          void *
+    118          list_tail(list_t list)
+    119          {
+    120            struct list *l;
+    121            
+    122            if(*list == NULL) {
+   \                     list_tail:
+   \   000000 9093         LDW       Y, X
+   \   000002 90FE         LDW       Y, (Y)
+   \   000004 905D         TNZW      Y
+   \   000006 26 02        JRNE      L:??list_tail_0
+    123              return NULL;
+   \   000008 5F           CLRW      X
+   \   000009 87           RETF
+    124            }
+    125            
+    126            for(l = *list; l->next != NULL; l = l->next);
+   \                     ??list_tail_0:
+   \   00000A FE           LDW       X, (X)
+   \   00000B 20 01        JRA       L:??list_tail_1
+   \                     ??list_tail_2:
+   \   00000D FE           LDW       X, (X)
+   \                     ??list_tail_1:
+   \   00000E 9093         LDW       Y, X
+   \   000010 90FE         LDW       Y, (Y)
+   \   000012 905D         TNZW      Y
+   \   000014 26 F7        JRNE      L:??list_tail_2
+    127            
+    128            return l;
+   \   000016 87           RETF
+    129          }
+    130          /*---------------------------------------------------------------------------*/
+    131          /**
+    132           * Add an item at the end of a list.
+    133           *
+    134           * This function adds an item to the end of the list.
+    135           *
+    136           * \param list The list.
+    137           * \param item A pointer to the item to be added.
+    138           *
+    139           * \sa list_push()
+    140           *
+    141           */
+
+   \                                 In section .far_func.text, align 1
+    142          void
+    143          list_add(list_t list, void *item)
+    144          {
+   \                     list_add:
+   \   000000 8D ......    CALLF     L:?push_l2
+   \   000004 BF ..        LDW       S:?w5, X
+   \   000006 90BF ..      LDW       S:?w4, Y
+    145            struct list *l;
+    146          
+    147            /* Make sure not to add the same element twice */
+    148            list_remove(list, item);
+   \   000009 90BE ..      LDW       Y, S:?w4
+   \   00000C BE ..        LDW       X, S:?w5
+   \   00000E 8D ......    CALLF     list_remove
+    149          
+    150            ((struct list *)item)->next = NULL;
+   \   000012 5F           CLRW      X
+   \   000013 92CF ..      LDW       [S:?w4.w], X
+    151            
+    152            l = list_tail(list);
+   \   000016 BE ..        LDW       X, S:?w5
+   \   000018 8D ......    CALLF     list_tail
+    153          
+    154            if(l == NULL) {
+   \   00001C 5D           TNZW      X
+   \   00001D 26 09        JRNE      L:??list_add_0
+    155              *list = item;
+   \   00001F BE ..        LDW       X, S:?w4
+   \   000021 92CF ..      LDW       [S:?w5.w], X
+   \   000024 AC ......    JPF       L:?epilogue_l2
+    156            } else {
+    157              l->next = item;
+   \                     ??list_add_0:
+   \   000028 90BE ..      LDW       Y, S:?w4
+   \   00002B FF           LDW       (X), Y
+    158            }
+    159          }
+   \   00002C AC ......    JPF       L:?epilogue_l2
+    160          /*---------------------------------------------------------------------------*/
+    161          /**
+    162           * Add an item to the start of the list.
+    163           */
+
+   \                                 In section .far_func.text, align 1
+    164          void
+    165          list_push(list_t list, void *item)
+    166          {
+   \                     list_push:
+   \   000000 8D ......    CALLF     L:?push_w4
+   \   000004 BF ..        LDW       S:?w4, X
+   \   000006 90BF ..      LDW       S:?w3, Y
+    167            /*  struct list *l;*/
+    168          
+    169            /* Make sure not to add the same element twice */
+    170            list_remove(list, item);
+   \   000009 90BE ..      LDW       Y, S:?w3
+   \   00000C BE ..        LDW       X, S:?w4
+   \   00000E 8D ......    CALLF     list_remove
+    171          
+    172            ((struct list *)item)->next = *list;
+   \   000012 92CE ..      LDW       X, [S:?w4.w]
+   \   000015 92CF ..      LDW       [S:?w3.w], X
+    173            *list = item;
+   \   000018 BE ..        LDW       X, S:?w3
+   \   00001A 92CF ..      LDW       [S:?w4.w], X
+    174          }
+   \   00001D AC ......    JPF       L:?epilogue_w4
+    175          /*---------------------------------------------------------------------------*/
+    176          /**
+    177           * Remove the last object on the list.
+    178           *
+    179           * This function removes the last object on the list and returns it.
+    180           *
+    181           * \param list The list
+    182           * \return The removed object
+    183           *
+    184           */
+
+   \                                 In section .far_func.text, align 1, keep-with-next
+    185          void *
+    186          list_chop(list_t list)
+    187          {
+   \                     list_chop:
+   \   000000 9093         LDW       Y, X
+    188            struct list *l, *r;
+    189            
+    190            if(*list == NULL) {
+   \   000002 93           LDW       X, Y
+   \   000003 FE           LDW       X, (X)
+   \   000004 5D           TNZW      X
+   \   000005 26 02        JRNE      L:??list_chop_0
+    191              return NULL;
+   \   000007 5F           CLRW      X
+   \   000008 87           RETF
+    192            }
+    193            if(((struct list *)*list)->next == NULL) {
+   \                     ??list_chop_0:
+   \   000009 93           LDW       X, Y
+   \   00000A FE           LDW       X, (X)
+   \   00000B FE           LDW       X, (X)
+   \   00000C 5D           TNZW      X
+   \   00000D 26 0A        JRNE      L:??list_chop_1
+    194              l = *list;
+   \   00000F 93           LDW       X, Y
+   \   000010 FE           LDW       X, (X)
+   \   000011 BF ..        LDW       S:?w0, X
+    195              *list = NULL;
+   \   000013 5F           CLRW      X
+   \   000014 90FF         LDW       (Y), X
+    196              return l;
+   \   000016 BE ..        LDW       X, S:?w0
+   \   000018 87           RETF
+    197            }
+    198            
+    199            for(l = *list; l->next->next != NULL; l = l->next);
+   \                     ??list_chop_1:
+   \   000019 93           LDW       X, Y
+   \   00001A FE           LDW       X, (X)
+   \   00001B BF ..        LDW       S:?w0, X
+   \   00001D 20 05        JRA       L:??list_chop_2
+   \                     ??list_chop_3:
+   \   00001F 92CE ..      LDW       X, [S:?w0.w]
+   \   000022 BF ..        LDW       S:?w0, X
+   \                     ??list_chop_2:
+   \   000024 92CE ..      LDW       X, [S:?w0.w]
+   \   000027 FE           LDW       X, (X)
+   \   000028 5D           TNZW      X
+   \   000029 26 F4        JRNE      L:??list_chop_3
+    200          
+    201            r = l->next;
+   \   00002B 91CE ..      LDW       Y, [S:?w0.w]
+    202            l->next = NULL;
+   \   00002E 5F           CLRW      X
+   \   00002F 92CF ..      LDW       [S:?w0.w], X
+    203            
+    204            return r;
+   \   000032 93           LDW       X, Y
+   \   000033 87           RETF
+    205          }
+    206          /*---------------------------------------------------------------------------*/
+    207          /**
+    208           * Remove the first object on a list.
+    209           *
+    210           * This function removes the first object on the list and returns a
+    211           * pointer to it.
+    212           *
+    213           * \param list The list.
+    214           * \return Pointer to the removed element of list.
+    215           */
+    216          /*---------------------------------------------------------------------------*/
+
+   \                                 In section .far_func.text, align 1, keep-with-next
+    217          void *
+    218          list_pop(list_t list)
+    219          {
+   \                     list_pop:
+   \   000000 9093         LDW       Y, X
+    220            struct list *l;
+    221            l = *list;
+   \   000002 93           LDW       X, Y
+   \   000003 FE           LDW       X, (X)
+   \   000004 BF ..        LDW       S:?w0, X
+    222            if(*list != NULL) {
+   \   000006 93           LDW       X, Y
+   \   000007 FE           LDW       X, (X)
+   \   000008 5D           TNZW      X
+   \   000009 27 05        JREQ      L:??list_pop_0
+    223              *list = ((struct list *)*list)->next;
+   \   00000B 93           LDW       X, Y
+   \   00000C FE           LDW       X, (X)
+   \   00000D FE           LDW       X, (X)
+   \   00000E 90FF         LDW       (Y), X
+    224            }
+    225          
+    226            return l;
+   \                     ??list_pop_0:
+   \   000010 BE ..        LDW       X, S:?w0
+   \   000012 87           RETF
+    227          }
+    228          /*---------------------------------------------------------------------------*/
+    229          /**
+    230           * Remove a specific element from a list.
+    231           *
+    232           * This function removes a specified element from the list.
+    233           *
+    234           * \param list The list.
+    235           * \param item The item that is to be removed from the list.
+    236           *
+    237           */
+    238          /*---------------------------------------------------------------------------*/
+
+   \                                 In section .far_func.text, align 1, keep-with-next
+    239          void
+    240          list_remove(list_t list, void *item)
+    241          {
+   \                     list_remove:
+   \   000000 BF ..        LDW       S:?w1, X
+   \   000002 90BF ..      LDW       S:?w2, Y
+    242            struct list *l, *r;
+    243            
+    244            if(*list == NULL) {
+   \   000005 92CE ..      LDW       X, [S:?w1.w]
+   \   000008 5D           TNZW      X
+   \   000009 27 2D        JREQ      L:??list_remove_0
+    245              return;
+    246            }
+    247            
+    248            r = NULL;
+   \   00000B 3F ..        CLR       S:?b1
+   \   00000D 3F ..        CLR       S:?b0
+    249            for(l = *list; l != NULL; l = l->next) {
+   \   00000F 92CE ..      LDW       X, [S:?w1.w]
+   \   000012 20 03        JRA       L:??list_remove_1
+    250              if(l == item) {
+    251                if(r == NULL) {
+    252          	/* First on list */
+    253          	*list = l->next;
+    254                } else {
+    255          	/* Not first on list */
+    256          	r->next = l->next;
+    257                }
+    258                l->next = NULL;
+    259                return;
+    260              }
+    261              r = l;
+   \                     ??list_remove_2:
+   \   000014 BF ..        LDW       S:?w0, X
+   \   000016 FE           LDW       X, (X)
+   \                     ??list_remove_1:
+   \   000017 5D           TNZW      X
+   \   000018 27 1E        JREQ      L:??list_remove_0
+   \   00001A B3 ..        CPW       X, S:?w2
+   \   00001C 26 F6        JRNE      L:??list_remove_2
+   \   00001E 90BE ..      LDW       Y, S:?w0
+   \   000021 905D         TNZW      Y
+   \   000023 26 09        JRNE      L:??list_remove_3
+   \   000025 9093         LDW       Y, X
+   \   000027 90FE         LDW       Y, (Y)
+   \   000029 91CF ..      LDW       [S:?w1.w], Y
+   \   00002C 20 07        JRA       L:??list_remove_4
+   \                     ??list_remove_3:
+   \   00002E 9093         LDW       Y, X
+   \   000030 90FE         LDW       Y, (Y)
+   \   000032 91CF ..      LDW       [S:?w0.w], Y
+   \                     ??list_remove_4:
+   \   000035 905F         CLRW      Y
+   \   000037 FF           LDW       (X), Y
+    262            }
+    263          }
+   \                     ??list_remove_0:
+   \   000038 87           RETF
+    264          /*---------------------------------------------------------------------------*/
+    265          /**
+    266           * Get the length of a list.
+    267           *
+    268           * This function counts the number of elements on a specified list.
+    269           *
+    270           * \param list The list.
+    271           * \return The length of the list.
+    272           */
+    273          /*---------------------------------------------------------------------------*/
+
+   \                                 In section .far_func.text, align 1, keep-with-next
+    274          int
+    275          list_length(list_t list)
+    276          {
+    277            struct list *l;
+    278            int n = 0;
+   \                     list_length:
+   \   000000 905F         CLRW      Y
+    279          
+    280            for(l = *list; l != NULL; l = l->next) {
+   \   000002 FE           LDW       X, (X)
+   \   000003 20 03        JRA       L:??list_length_0
+    281              ++n;
+   \                     ??list_length_1:
+   \   000005 905C         INCW      Y
+    282            }
+   \   000007 FE           LDW       X, (X)
+   \                     ??list_length_0:
+   \   000008 5D           TNZW      X
+   \   000009 26 FA        JRNE      L:??list_length_1
+    283          
+    284            return n;
+   \   00000B 93           LDW       X, Y
+   \   00000C 87           RETF
+    285          }
+    286          /*---------------------------------------------------------------------------*/
+    287          /**
+    288           * \brief      Insert an item after a specified item on the list
+    289           * \param list The list
+    290           * \param previtem The item after which the new item should be inserted
+    291           * \param newitem  The new item that is to be inserted
+    292           * \author     Adam Dunkels
+    293           *
+    294           *             This function inserts an item right after a specified
+    295           *             item on the list. This function is useful when using
+    296           *             the list module to ordered lists.
+    297           *
+    298           *             If previtem is NULL, the new item is placed at the
+    299           *             start of the list.
+    300           *
+    301           */
+
+   \                                 In section .far_func.text, align 1, keep-with-next
+    302          void
+    303          list_insert(list_t list, void *previtem, void *newitem)
+    304          {
+   \                     list_insert:
+   \   000000 BF ..        LDW       S:?w1, X
+   \   000002 93           LDW       X, Y
+    305            if(previtem == NULL) {
+   \   000003 5D           TNZW      X
+   \   000004 26 09        JRNE      L:??list_insert_0
+    306              list_push(list, newitem);
+   \   000006 90BE ..      LDW       Y, S:?w0
+   \   000009 BE ..        LDW       X, S:?w1
+   \   00000B AC ......    JPF       list_push
+    307            } else {
+    308            
+    309              ((struct list *)newitem)->next = ((struct list *)previtem)->next;
+   \                     ??list_insert_0:
+   \   00000F 9093         LDW       Y, X
+   \   000011 90FE         LDW       Y, (Y)
+   \   000013 91CF ..      LDW       [S:?w0.w], Y
+    310              ((struct list *)previtem)->next = newitem;
+   \   000016 90BE ..      LDW       Y, S:?w0
+   \   000019 FF           LDW       (X), Y
+    311            }
+    312          }
+   \   00001A 87           RETF
+    313          /*---------------------------------------------------------------------------*/
+    314          /**
+    315           * \brief      Get the next item following this item
+    316           * \param item A list item
+    317           * \returns    A next item on the list
+    318           *
+    319           *             This function takes a list item and returns the next
+    320           *             item on the list, or NULL if there are no more items on
+    321           *             the list. This function is used when iterating through
+    322           *             lists.
+    323           */
+
+   \                                 In section .far_func.text, align 1
+    324          void *
+    325          list_item_next(void *item)
+    326          {
+    327            return item == NULL? NULL: ((struct list *)item)->next;
+   \                     list_item_next:
+   \   000000 5D           TNZW      X
+   \   000001 26 02        JRNE      L:??list_item_next_0
+   \   000003 5F           CLRW      X
+   \   000004 87           RETF
+   \                     ??list_item_next_0:
+   \   000005 FE           LDW       X, (X)
+   \   000006 87           RETF
+    328          }
+    329          /*---------------------------------------------------------------------------*/
+    330          /** @} */
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      48  list_add
+      52  list_chop
+       4  list_copy
+       2  list_head
+       4  list_init
+      27  list_insert
+       7  list_item_next
+      13  list_length
+      19  list_pop
+      33  list_push
+      57  list_remove
+      23  list_tail
+
+ 
+ 289 bytes in section .far_func.text
+ 
+ 289 bytes of CODE memory
+
+Errors: none
+Warnings: none

@@ -13,6 +13,8 @@ typedef unsigned short    U16;
 typedef unsigned char     INT8U;
 typedef unsigned short    INT16U;
 typedef unsigned long     INT32U;
+typedef unsigned char     u8;
+typedef unsigned short    u16;
 
 #ifndef NULL
 #define NULL  ((void*)0)

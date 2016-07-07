@@ -1,0 +1,213 @@
+###############################################################################
+#                                                                             #
+# IAR C/C++ Compiler V1.42.1.142 for STM8               01/Jul/2016  17:36:13 #
+# Copyright 2010-2013 IAR Systems AB.                                         #
+#                                                                             #
+#    Source file  =  E:\hwpro-2016\20160627_L\drivers\rtc.c                   #
+#    Command line =  E:\hwpro-2016\20160627_L\drivers\rtc.c -e -Ol --no_cse   #
+#                    --no_unroll --no_inline --no_code_motion --no_tbaa       #
+#                    --no_cross_call --debug --code_model medium              #
+#                    --data_model medium -o E:\hwpro-2016\20160627_L\iar\Debu #
+#                    g\Obj\ --dlib_config "C:\Program Files (x86)\IAR         #
+#                    Systems\Embedded Workbench 6.5\stm8\LIB\dlstm8mmn.h" -D  #
+#                    STM8L15X_MD -lC E:\hwpro-2016\20160627_L\iar\Debug\List\ #
+#                     -I E:\hwpro-2016\20160627_L\iar\..\stm8l15x_lib\inc\    #
+#                    -I E:\hwpro-2016\20160627_L\iar\..\user\inc\ -I          #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\xprintf\ -I        #
+#                    E:\hwpro-2016\20160627_L\iar\..\drivers\ -I              #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\ -I                #
+#                    E:\hwpro-2016\20160627_L\iar\..\app\ --vregs 16          #
+#    List file    =  E:\hwpro-2016\20160627_L\iar\Debug\List\rtc.lst          #
+#    Object file  =  E:\hwpro-2016\20160627_L\iar\Debug\Obj\rtc.o             #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+E:\hwpro-2016\20160627_L\drivers\rtc.c
+      1          #include "stm8l15x.h"
+      2          #include "basictype.h"
+
+  typedef unsigned char 	  uint8_t;
+                        	  ^
+"E:\hwpro-2016\20160627_L\user\inc\basictype.h",8  Warning[Pe301]: typedef
+          name has already been declared (with same type)
+
+  typedef unsigned short	  uint16_t;
+                        	  ^
+"E:\hwpro-2016\20160627_L\user\inc\basictype.h",10  Warning[Pe301]: typedef
+          name has already been declared (with same type)
+
+  typedef unsigned char     u8;
+                            ^
+"E:\hwpro-2016\20160627_L\user\inc\basictype.h",16  Warning[Pe301]: typedef
+          name has already been declared (with same type)
+
+  typedef unsigned short    u16;
+                            ^
+"E:\hwpro-2016\20160627_L\user\inc\basictype.h",17  Warning[Pe301]: typedef
+          name has already been declared (with same type)
+      3          #include "sysprintf.h"
+      4          #include "stm8l15x_it.h"
+      5          #include "stm8l15x_rtc.h"
+      6          #include "rtc.h"
+      7          
+      8          
+
+   \                                 In section .far_func.text, align 1
+      9          void rtcInit(void)
+     10          {
+     11          	RTC_DeInit();
+   \                     rtcInit:
+   \   000000 8D ......    CALLF     RTC_DeInit
+     12          	//CLK_RTCClockConfig(CLK_RTCCLKSource_LSI, CLK_RTCCLKDiv_1);    //LSI=38kHz
+     13          	CLK_RTCClockConfig(CLK_RTCCLKSource_LSI, CLK_RTCCLKDiv_2);    //LSI=38kHz/2
+   \   000004 35 20 ....   MOV       S:?b0, #0x20
+   \   000008 A6 04        LD        A, #0x4
+   \   00000A 8D ......    CALLF     CLK_RTCClockConfig
+     14          	CLK_PeripheralClockConfig(CLK_Peripheral_RTC,ENABLE);
+   \   00000E 35 01 ....   MOV       S:?b0, #0x1
+   \   000012 A6 12        LD        A, #0x12
+   \   000014 8D ......    CALLF     CLK_PeripheralClockConfig
+     15          	RTC_WakeUpCmd(DISABLE);
+   \   000018 4F           CLR       A
+   \   000019 8D ......    CALLF     RTC_WakeUpCmd
+     16          	//RTC_WakeUpClockConfig(RTC_WakeUpClock_RTCCLK_Div16);        //LSI/
+     17          	RTC_WakeUpClockConfig(RTC_WakeUpClock_RTCCLK_Div16);          //LSI=38kHz/16/2 = LSI/32=421.05us
+   \   00001D 4F           CLR       A
+   \   00001E 8D ......    CALLF     RTC_WakeUpClockConfig
+     18          	RTC_ITConfig(RTC_IT_WUT, ENABLE);
+   \   000022 A6 01        LD        A, #0x1
+   \   000024 AE 0040      LDW       X, #0x40
+   \   000027 AC ......    JPF       RTC_ITConfig
+     19          	/*
+     20          	RTC_WakeUpCmd(DISABLE);
+     21          	RTC_SetWakeUpCounter(next_wakeup);
+     22          	RTC_WakeUpCmd(ENABLE);
+     23          	*/
+     24          }
+     25          
+
+   \                                 In section .far_func.text, align 1
+     26          void rtcOn(U16 uwWakeTime)
+     27          {
+   \                     rtcOn:
+   \   000000 8D ......    CALLF     L:?push_w4
+   \   000004 BF ..        LDW       S:?w4, X
+     28          	RTC_WakeUpCmd(DISABLE);
+   \   000006 4F           CLR       A
+   \   000007 8D ......    CALLF     RTC_WakeUpCmd
+     29          	RTC_SetWakeUpCounter(uwWakeTime);
+   \   00000B BE ..        LDW       X, S:?w4
+   \   00000D 8D ......    CALLF     RTC_SetWakeUpCounter
+     30          	RTC_ITConfig(RTC_IT_WUT, ENABLE);
+   \   000011 A6 01        LD        A, #0x1
+   \   000013 AE 0040      LDW       X, #0x40
+   \   000016 8D ......    CALLF     RTC_ITConfig
+     31          	RTC_WakeUpCmd(ENABLE);
+   \   00001A A6 01        LD        A, #0x1
+   \   00001C 8D ......    CALLF     RTC_WakeUpCmd
+     32          }
+   \   000020 AC ......    JPF       L:?epilogue_w4
+     33          
+
+   \                                 In section .far_func.text, align 1
+     34          void rtc_off(void)
+     35          {
+     36          	RTC_ITConfig(RTC_IT_WUT, DISABLE);
+   \                     rtc_off:
+   \   000000 4F           CLR       A
+   \   000001 AE 0040      LDW       X, #0x40
+   \   000004 8D ......    CALLF     RTC_ITConfig
+     37          	RTC_WakeUpCmd(DISABLE);
+   \   000008 4F           CLR       A
+   \   000009 AC ......    JPF       RTC_WakeUpCmd
+     38          }
+     39          
+     40          
+     41          /**
+     42            * @brief RTC / CSS_LSE Interrupt routine.
+     43            * @param  None
+     44            * @retval None
+     45            */
+
+   \                                 In section .far_func.text, align 1
+     46          INTERRUPT_HANDLER(RTC_CSSLSE_IRQHandler, 4)
+     47          {
+   \                     RTC_CSSLSE_IRQHandler:
+   \                     _interrupt_6:
+   \   000000 8A           PUSH      CC
+   \   000001 84           POP       A
+   \   000002 A4 BF        AND       A, #0xbf
+   \   000004 88           PUSH      A
+   \   000005 86           POP       CC
+   \   000006 8D ......    CALLF     L:?push_l0
+   \   00000A 8D ......    CALLF     L:?push_l1
+     48          	/* In order to detect unexpected events during development,
+     49          	 it is recommended to set a breakpoint on the following instruction.
+     50          	*/
+     51          	static u_long udwTime = 0;
+     52          	RTC_ClearITPendingBit(RTC_IT_WUT);
+   \   00000E AE 0040      LDW       X, #0x40
+   \   000011 8D ......    CALLF     RTC_ClearITPendingBit
+     53          	//XPRINTF((0, "rtc interrupt\r\n"));
+     54          	//XPRINTF((0, "%d\r\n", udwTime));
+     55          	//XPRINTF((0, "%ld\r\n", MS2ST(55000)));
+     56          	rtcOn(MS2ST(55000));
+   \   000015 AE FF05      LDW       X, #0xff05
+   \   000018 8D ......    CALLF     rtcOn
+     57          	udwTime += MS2ST(55000);
+   \   00001C AE FF05      LDW       X, #0xff05
+   \   00001F BF ..        LDW       S:?w1, X
+   \   000021 5F           CLRW      X
+   \   000022 BF ..        LDW       S:?w0, X
+   \   000024 AE ....      LDW       X, #??udwTime
+   \   000027 8D ......    CALLF     L:?add32_l0_l0_0x
+   \   00002B AE ....      LDW       X, #??udwTime
+   \   00002E 8D ......    CALLF     L:?load32_0x_l0
+     58          	XPRINTF((0, "%ld\r\n", udwTime));
+   \   000032 CE ....      LDW       X, L:??udwTime + 2
+   \   000035 89           PUSHW     X
+   \   000036 3B ....      PUSH      L:??udwTime + 1
+   \   000039 3B ....      PUSH      L:??udwTime
+   \   00003C 90AE ....    LDW       Y, #`?<Constant "%ld\\r\\n">`
+   \   000040 5F           CLRW      X
+   \   000041 8D ......    CALLF     __xstd_printf
+   \   000045 5B 04        ADD       SP, #0x4
+     59          }
+   \   000047 8D ......    CALLF     L:?pop_l1
+   \   00004B 8D ......    CALLF     L:?pop_l0
+   \   00004F 80           IRET
+
+   \                                 In section .near.bss, align 1
+   \                     ??udwTime:
+   \   000000              DS8 4
+
+   \                                 In section .near.rodata, align 1
+   \                     `?<Constant "%ld\\r\\n">`:
+   \   000000 25 6C 64 0D  DC8 "%ld\015\012"
+   \          0A 00       
+     60          
+     61          
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       6  ?<Constant "%ld\r\n">
+      80  RTC_CSSLSE_IRQHandler
+      43  rtcInit
+      36  rtcOn
+      13  rtc_off
+       4  udwTime
+
+ 
+ 172 bytes in section .far_func.text
+   4 bytes in section .near.bss
+   6 bytes in section .near.rodata
+ 
+ 172 bytes of CODE  memory
+   6 bytes of CONST memory
+   4 bytes of DATA  memory
+
+Errors: none
+Warnings: 4

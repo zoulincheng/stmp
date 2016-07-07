@@ -12,6 +12,8 @@ E:\hwpro-2016\20160627_L\iar\..\drivers
 -I
 E:\hwpro-2016\20160627_L\iar\..\utils
 -I
+E:\hwpro-2016\20160627_L\iar\..\app
+-I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 6.5\stm8\inc
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 6.5\stm8\inc\c
@@ -25,6 +27,8 @@ E:\hwpro-2016\20160627_L\utils\xprintf
 E:\hwpro-2016\20160627_L\drivers
 -I
 E:\hwpro-2016\20160627_L\utils
+-I
+E:\hwpro-2016\20160627_L\app
 -DSTM8L15X_MD=1
 -D__CHAR_BITS__=8
 -D__CHAR_MAX__=0xff
@@ -238,7 +242,7 @@ E:\hwpro-2016\20160627_L\utils
 -D__HAS_LOCATED_WITH_INIT__=1
 -D__IAR_COMPILERBASE__=593416
 -D__DATE__="Jul  1 2016"
--D__TIME__="16:46:56"
+-D__TIME__="17:31:06"
 -D__STDC__=1
 -D__STDC_VERSION__=199901L
 -D__STDC_HOSTED__=1

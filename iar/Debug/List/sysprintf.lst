@@ -1,0 +1,652 @@
+###############################################################################
+#                                                                             #
+# IAR C/C++ Compiler V1.42.1.142 for STM8               01/Jul/2016  17:36:14 #
+# Copyright 2010-2013 IAR Systems AB.                                         #
+#                                                                             #
+#    Source file  =  E:\hwpro-2016\20160627_L\utils\xprintf\sysprintf.c       #
+#    Command line =  E:\hwpro-2016\20160627_L\utils\xprintf\sysprintf.c -e    #
+#                    -Ol --no_cse --no_unroll --no_inline --no_code_motion    #
+#                    --no_tbaa --no_cross_call --debug --code_model medium    #
+#                    --data_model medium -o E:\hwpro-2016\20160627_L\iar\Debu #
+#                    g\Obj\ --dlib_config "C:\Program Files (x86)\IAR         #
+#                    Systems\Embedded Workbench 6.5\stm8\LIB\dlstm8mmn.h" -D  #
+#                    STM8L15X_MD -lC E:\hwpro-2016\20160627_L\iar\Debug\List\ #
+#                     -I E:\hwpro-2016\20160627_L\iar\..\stm8l15x_lib\inc\    #
+#                    -I E:\hwpro-2016\20160627_L\iar\..\user\inc\ -I          #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\xprintf\ -I        #
+#                    E:\hwpro-2016\20160627_L\iar\..\drivers\ -I              #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\ -I                #
+#                    E:\hwpro-2016\20160627_L\iar\..\app\ --vregs 16          #
+#    List file    =  E:\hwpro-2016\20160627_L\iar\Debug\List\sysprintf.lst    #
+#    Object file  =  E:\hwpro-2016\20160627_L\iar\Debug\Obj\sysprintf.o       #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+E:\hwpro-2016\20160627_L\utils\xprintf\sysprintf.c
+      1          #include <stdarg.h>
+      2          #include <ctype.h>
+
+   \                                 In section .far_func.text, align 1
+   \   __intrinsic __nounwind __far_func int _LocaleC_islower(int)
+   \                     _LocaleC_islower:
+   \   000000 1D 0061      SUBW      X, #0x61
+   \   000003 A3 001A      CPW       X, #0x1a
+   \   000006 24 04        JRNC      L:??_LocaleC_islower_0
+   \   000008 A6 01        LD        A, #0x1
+   \   00000A 20 01        JRA       L:??_LocaleC_islower_1
+   \                     ??_LocaleC_islower_0:
+   \   00000C 4F           CLR       A
+   \                     ??_LocaleC_islower_1:
+   \   00000D 5F           CLRW      X
+   \   00000E 97           LD        XL, A
+   \   00000F 87           RETF
+
+   \                                 In section .far_func.text, align 1
+   \   __intrinsic __nounwind __far_func int _LocaleC_isupper(int)
+   \                     _LocaleC_isupper:
+   \   000000 1D 0041      SUBW      X, #0x41
+   \   000003 A3 001A      CPW       X, #0x1a
+   \   000006 24 04        JRNC      L:??_LocaleC_isupper_0
+   \   000008 A6 01        LD        A, #0x1
+   \   00000A 20 01        JRA       L:??_LocaleC_isupper_1
+   \                     ??_LocaleC_isupper_0:
+   \   00000C 4F           CLR       A
+   \                     ??_LocaleC_isupper_1:
+   \   00000D 5F           CLRW      X
+   \   00000E 97           LD        XL, A
+   \   00000F 87           RETF
+
+   \                                 In section .far_func.text, align 1
+   \   __intrinsic __nounwind __far_func int _LocaleC_isalpha(int)
+   \                     _LocaleC_isalpha:
+   \   000000 8D ......    CALLF     L:?push_w4
+   \   000004 BF ..        LDW       S:?w4, X
+   \   000006 BE ..        LDW       X, S:?w4
+   \   000008 8D ......    CALLF     _LocaleC_islower
+   \   00000C 5D           TNZW      X
+   \   00000D 26 09        JRNE      L:??_LocaleC_isalpha_0
+   \   00000F BE ..        LDW       X, S:?w4
+   \   000011 8D ......    CALLF     _LocaleC_isupper
+   \   000015 5D           TNZW      X
+   \   000016 27 04        JREQ      L:??_LocaleC_isalpha_1
+   \                     ??_LocaleC_isalpha_0:
+   \   000018 A6 01        LD        A, #0x1
+   \   00001A 20 01        JRA       L:??_LocaleC_isalpha_2
+   \                     ??_LocaleC_isalpha_1:
+   \   00001C 4F           CLR       A
+   \                     ??_LocaleC_isalpha_2:
+   \   00001D 5F           CLRW      X
+   \   00001E 97           LD        XL, A
+   \   00001F AC ......    JPF       L:?epilogue_w4
+
+   \                                 In section .far_func.text, align 1
+   \   __intrinsic __nounwind __far_func int _LocaleC_ispunct(int)
+   \                     _LocaleC_ispunct:
+   \   000000 9093         LDW       Y, X
+   \   000002 72A2 0021    SUBW      Y, #0x21
+   \   000006 90A3 000F    CPW       Y, #0xf
+   \   00000A 25 20        JRC       L:??_LocaleC_ispunct_0
+   \   00000C 9093         LDW       Y, X
+   \   00000E 72A2 003A    SUBW      Y, #0x3a
+   \   000012 90A3 0007    CPW       Y, #0x7
+   \   000016 25 14        JRC       L:??_LocaleC_ispunct_0
+   \   000018 9093         LDW       Y, X
+   \   00001A 72A2 005B    SUBW      Y, #0x5b
+   \   00001E 90A3 0006    CPW       Y, #0x6
+   \   000022 25 08        JRC       L:??_LocaleC_ispunct_0
+   \   000024 1D 007B      SUBW      X, #0x7b
+   \   000027 A3 0004      CPW       X, #0x4
+   \   00002A 24 04        JRNC      L:??_LocaleC_ispunct_1
+   \                     ??_LocaleC_ispunct_0:
+   \   00002C A6 01        LD        A, #0x1
+   \   00002E 20 01        JRA       L:??_LocaleC_ispunct_2
+   \                     ??_LocaleC_ispunct_1:
+   \   000030 4F           CLR       A
+   \                     ??_LocaleC_ispunct_2:
+   \   000031 5F           CLRW      X
+   \   000032 97           LD        XL, A
+   \   000033 87           RETF
+
+   \                                 In section .far_func.text, align 1
+   \   __intrinsic __nounwind __far_func int _LocaleC_toupper(int)
+   \                     _LocaleC_toupper:
+   \   000000 8D ......    CALLF     L:?push_w4
+   \   000004 BF ..        LDW       S:?w4, X
+   \   000006 BE ..        LDW       X, S:?w4
+   \   000008 8D ......    CALLF     _LocaleC_islower
+   \   00000C 5D           TNZW      X
+   \   00000D 27 09        JREQ      L:??_LocaleC_toupper_0
+   \   00000F BE ..        LDW       X, S:?w4
+   \   000011 1C FFE0      ADDW      X, #0xffffffffffffffe0
+   \   000014 AC ......    JPF       L:?epilogue_w4
+   \                     ??_LocaleC_toupper_0:
+   \   000018 BE ..        LDW       X, S:?w4
+   \   00001A AC ......    JPF       L:?epilogue_w4
+
+   \                                 In section .far_func.text, align 1
+   \   __intrinsic __nounwind __far_func int isprint(int)
+   \                     isprint:
+   \   000000 8D ......    CALLF     L:?push_w4
+   \   000004 BF ..        LDW       S:?w4, X
+   \   000006 BE ..        LDW       X, S:?w4
+   \   000008 1D 0020      SUBW      X, #0x20
+   \   00000B A3 005F      CPW       X, #0x5f
+   \   00000E 25 12        JRC       L:??isprint_0
+   \   000010 BE ..        LDW       X, S:?w4
+   \   000012 8D ......    CALLF     isalpha
+   \   000016 5D           TNZW      X
+   \   000017 26 09        JRNE      L:??isprint_0
+   \   000019 BE ..        LDW       X, S:?w4
+   \   00001B 8D ......    CALLF     ispunct
+   \   00001F 5D           TNZW      X
+   \   000020 27 04        JREQ      L:??isprint_1
+   \                     ??isprint_0:
+   \   000022 A6 01        LD        A, #0x1
+   \   000024 20 01        JRA       L:??isprint_2
+   \                     ??isprint_1:
+   \   000026 4F           CLR       A
+   \                     ??isprint_2:
+   \   000027 5F           CLRW      X
+   \   000028 97           LD        XL, A
+   \   000029 AC ......    JPF       L:?epilogue_w4
+
+   \                                 In section .far_func.text, align 1
+   \   __intrinsic __nounwind __far_func int toupper(int)
+   \                     toupper:
+   \   000000 AC ......    JPF       _LocaleC_toupper
+
+   \                                 In section .far_func.text, align 1
+   \   __intrinsic __nounwind __far_func int isalpha(int)
+   \                     isalpha:
+   \   000000 AC ......    JPF       _LocaleC_isalpha
+
+   \                                 In section .far_func.text, align 1
+   \   __intrinsic __nounwind __far_func int ispunct(int)
+   \                     ispunct:
+   \   000000 AC ......    JPF       _LocaleC_ispunct
+      3          
+      4          
+      5          #include "xprintf.h"
+      6          #include "basictype.h"
+      7          
+      8          #include "sysprintf.h"
+      9          
+     10          //typedef int *va_list[1];
+     11          
+     12          extern void xvprintf (
+     13          	const char*	fmt,	/* Pointer to the format string */
+     14          	va_list arp			/* Pointer to arguments */
+     15          );
+     16          
+     17          
+     18          
+     19          /* Compare memory to memory */
+
+   \                                 In section .far_func.text, align 1
+     20          int mem_cmp (const void* dst, const void* src, unsigned int cnt) 
+     21          {
+   \                     mem_cmp:
+   \   000000 BF ..        LDW       S:?w1, X
+   \   000002 93           LDW       X, Y
+   \   000003 8D ......    CALLF     L:?mov_w2_w0
+     22          	const BYTE *d = (const BYTE *)dst, *s = (const BYTE *)src;
+   \   000007 90BE ..      LDW       Y, S:?w1
+   \   00000A BF ..        LDW       S:?w0, X
+     23          	int r = 0;
+   \   00000C 3F ..        CLR       S:?b3
+   \   00000E 3F ..        CLR       S:?b2
+     24          
+     25          	while (cnt-- && (r = *d++ - *s++) == 0) ;
+   \                     ??mem_cmp_0:
+   \   000010 8D ......    CALLF     L:?mov_w3_w2
+   \   000014 BE ..        LDW       X, S:?w3
+   \   000016 5A           DECW      X
+   \   000017 BF ..        LDW       S:?w2, X
+   \   000019 BE ..        LDW       X, S:?w3
+   \   00001B 5D           TNZW      X
+   \   00001C 27 1F        JREQ      L:??mem_cmp_1
+   \   00001E 92C6 ..      LD        A, [S:?w0.w]
+   \   000021 5F           CLRW      X
+   \   000022 97           LD        XL, A
+   \   000023 BF ..        LDW       S:?w1, X
+   \   000025 90F6         LD        A, (Y)
+   \   000027 5F           CLRW      X
+   \   000028 97           LD        XL, A
+   \   000029 72B0 ....    SUBW      X, S:?w1
+   \   00002D BF ..        LDW       S:?w1, X
+   \   00002F BE ..        LDW       X, S:?w0
+   \   000031 5C           INCW      X
+   \   000032 BF ..        LDW       S:?w0, X
+   \   000034 93           LDW       X, Y
+   \   000035 5C           INCW      X
+   \   000036 9093         LDW       Y, X
+   \   000038 BE ..        LDW       X, S:?w1
+   \   00003A 5D           TNZW      X
+   \   00003B 27 D3        JREQ      L:??mem_cmp_0
+     26          	return r;
+   \                     ??mem_cmp_1:
+   \   00003D BE ..        LDW       X, S:?w1
+   \   00003F 87           RETF
+     27          }
+     28          
+     29          
+
+   \                                 In section .far_func.text, align 1
+     30          int strcmp_ex(char const*s1,char const *s2)
+     31          {
+   \                     strcmp_ex:
+   \   000000 8D ......    CALLF     L:?push_l2
+   \   000004 8D ......    CALLF     L:?push_w6
+   \   000008 BF ..        LDW       S:?w5, X
+   \   00000A 90BF ..      LDW       S:?w4, Y
+     32          	char c1,c2;
+     33          	
+     34          	while( 1)
+     35          	{
+     36          		c1=toupper(*s1++);
+   \                     ??strcmp_ex_0:
+   \   00000D 92C6 ..      LD        A, [S:?w5.w]
+   \   000010 5F           CLRW      X
+   \   000011 97           LD        XL, A
+   \   000012 8D ......    CALLF     toupper
+   \   000016 BF ..        LDW       S:?w6, X
+   \   000018 BE ..        LDW       X, S:?w5
+   \   00001A 5C           INCW      X
+   \   00001B BF ..        LDW       S:?w5, X
+     37          		c2=toupper(*s2++);
+   \   00001D 92C6 ..      LD        A, [S:?w4.w]
+   \   000020 5F           CLRW      X
+   \   000021 97           LD        XL, A
+   \   000022 8D ......    CALLF     toupper
+   \   000026 9093         LDW       Y, X
+   \   000028 BE ..        LDW       X, S:?w4
+   \   00002A 5C           INCW      X
+   \   00002B BF ..        LDW       S:?w4, X
+   \   00002D 909F         LD        A, YL
+     38          		
+     39          		if(c1!=c2 || c1 == 0 || c2 == 0)  
+   \   00002F B1 ..        CP        A, S:?b13
+   \   000031 26 07        JRNE      L:??strcmp_ex_1
+   \   000033 3D ..        TNZ       S:?b13
+   \   000035 27 03        JREQ      L:??strcmp_ex_1
+   \   000037 4D           TNZ       A
+   \   000038 26 D3        JRNE      L:??strcmp_ex_0
+     40          			break;
+     41          	}
+     42          
+     43          	return ((int)c1 - (int)c2);
+   \                     ??strcmp_ex_1:
+   \   00003A 905F         CLRW      Y
+   \   00003C 9097         LD        YL, A
+   \   00003E 5F           CLRW      X
+   \   00003F 41           EXG       A, XL
+   \   000040 B6 ..        LD        A, S:?b13
+   \   000042 41           EXG       A, XL
+   \   000043 90BF ..      LDW       S:?w0, Y
+   \   000046 72B0 ....    SUBW      X, S:?w0
+   \   00004A AC ......    JPF       L:?epilogue_l2_w6
+     44          }
+     45          
+     46          
+     47          
+     48          
+     49          
+     50          
+
+   \                                 In section .near.data, align 1
+     51          static char g_nDebufLevel = 12;// level = -1, means to get the level, no change to g_nDebugLevel
+   \                     g_nDebufLevel:
+   \   000000 0C           DC8 12
+
+   \                                 In section .far_func.text, align 1
+     52          char *get_gdbLevel(void)
+     53          {
+     54          	return &g_nDebufLevel;
+   \                     get_gdbLevel:
+   \   000000 AE ....      LDW       X, #g_nDebufLevel
+   \   000003 87           RETF
+     55          }
+     56          
+     57          
+
+   \                                 In section .far_func.text, align 1
+     58          void  __xstd_printf(int level, const char * fmt,...)
+     59          {
+   \                     __xstd_printf:
+   \   000000 90BF ..      LDW       S:?w0, Y
+     60              //int rc = 0;
+     61              va_list ap;
+     62          
+     63              if(((unsigned char)level <= g_nDebufLevel && g_nDebufLevel!=20))
+   \   000003 41           EXG       A, XL
+   \   000004 B7 ..        LD        S:?b2, A
+   \   000006 41           EXG       A, XL
+   \   000007 C6 ....      LD        A, L:g_nDebufLevel
+   \   00000A B1 ..        CP        A, S:?b2
+   \   00000C 25 13        JRC       L:??__xstd_printf_0
+   \   00000E C6 ....      LD        A, L:g_nDebufLevel
+   \   000011 A1 14        CP        A, #0x14
+   \   000013 27 0C        JREQ      L:??__xstd_printf_0
+     64              {
+     65                 va_start(ap, fmt);
+   \   000015 9096         LDW       Y, SP
+   \   000017 72A9 0004    ADDW      Y, #0x4
+     66                 xvprintf(fmt, ap);
+   \   00001B BE ..        LDW       X, S:?w0
+   \   00001D 8D ......    CALLF     xvprintf
+     67                 va_end(ap);
+     68              }
+     69              //return rc;
+     70          }
+   \                     ??__xstd_printf_0:
+   \   000021 87           RETF
+     71          
+     72          
+
+   \                                 In section .far_func.text, align 1
+     73          int __xstd_dump(int level,const char *sczTitle,const void *pciBuf,int nSize)
+     74          {
+   \                     __xstd_dump:
+   \   000000 8D ......    CALLF     L:?push_l2
+   \   000004 8D ......    CALLF     L:?push_l3
+   \   000008 52 02        SUB       SP, #0x2
+   \   00000A BF ..        LDW       S:?w2, X
+   \   00000C 90BF ..      LDW       S:?w6, Y
+   \   00000F 8D ......    CALLF     L:?mov_w7_w1
+     75          	if(level <= g_nDebufLevel && g_nDebufLevel!=20)
+   \   000013 C6 ....      LD        A, L:g_nDebufLevel
+   \   000016 5F           CLRW      X
+   \   000017 97           LD        XL, A
+   \   000018 B3 ..        CPW       X, S:?w2
+   \   00001A 2E 03        JRSGE     ??lb_0
+   \   00001C CC ....      JP        L:??__xstd_dump_0
+   \                     ??lb_0:
+   \   00001F C6 ....      LD        A, L:g_nDebufLevel
+   \   000022 A1 14        CP        A, #0x14
+   \   000024 26 03        JRNE      ??lb_1
+   \   000026 CC ....      JP        L:??__xstd_dump_0
+     76          	{
+     77          		int i,n;
+     78          		const unsigned char*pcBuf = (unsigned char*)pciBuf;
+   \                     ??lb_1:
+   \   000029 BE ..        LDW       X, S:?w0
+   \   00002B 1F 01        LDW       (0x1,SP), X
+     79          	
+     80          		if(sczTitle)
+   \   00002D BE ..        LDW       X, S:?w6
+   \   00002F 5D           TNZW      X
+   \   000030 27 11        JREQ      L:??__xstd_dump_1
+     81          			xprintf("%-5s%-4d:",sczTitle,nSize);
+   \   000032 8D ......    CALLF     L:?push_w7
+   \   000036 8D ......    CALLF     L:?push_w6
+   \   00003A AE ....      LDW       X, #`?<Constant "%-5s%-4d:">`
+   \   00003D 8D ......    CALLF     xprintf
+   \   000041 5B 04        ADD       SP, #0x4
+     82          	
+     83          		for(i=0;i<nSize;i++)
+   \                     ??__xstd_dump_1:
+   \   000043 3F ..        CLR       S:?b11
+   \   000045 3F ..        CLR       S:?b10
+   \   000047 20 25        JRA       L:??__xstd_dump_2
+     84          		{
+     85          			unsigned int param = (unsigned int)(pcBuf[i]&0xff);
+     86          			xprintf(" %02X",param);
+     87          			if((i%16) == 15)
+     88          			{
+     89          				xprintf(" ;");
+     90          				for(n = i&0xffffFFF0; n<=i; n++)
+     91          					xprintf("%c",isprint(pcBuf[n])?pcBuf[n]:'.');
+     92          				xprintf("\r\n");
+   \                     ??__xstd_dump_3:
+   \   000049 AE ....      LDW       X, #`?<Constant "\\r\\n">`
+   \   00004C 8D ......    CALLF     xprintf
+     93          				if(sczTitle && (i+1) < nSize)
+   \   000050 BE ..        LDW       X, S:?w6
+   \   000052 5D           TNZW      X
+   \   000053 27 14        JREQ      L:??__xstd_dump_4
+   \   000055 BE ..        LDW       X, S:?w5
+   \   000057 5C           INCW      X
+   \   000058 B3 ..        CPW       X, S:?w7
+   \   00005A 2E 0D        JRSGE     L:??__xstd_dump_4
+     94          				{
+     95          					xprintf("%-9s:","");
+   \   00005C 4B ..        PUSH      #BYTE1(`?<Constant "">`)
+   \   00005E 4B ..        PUSH      #BYTE2(`?<Constant "">`)
+   \   000060 AE ....      LDW       X, #`?<Constant "%-9s:">`
+   \   000063 8D ......    CALLF     xprintf
+   \   000067 5B 02        ADD       SP, #0x2
+     96          				}
+   \                     ??__xstd_dump_4:
+   \   000069 BE ..        LDW       X, S:?w5
+   \   00006B 5C           INCW      X
+   \   00006C BF ..        LDW       S:?w5, X
+   \                     ??__xstd_dump_2:
+   \   00006E BE ..        LDW       X, S:?w5
+   \   000070 B3 ..        CPW       X, S:?w7
+   \   000072 2E 67        JRSGE     L:??__xstd_dump_5
+   \   000074 BE ..        LDW       X, S:?w5
+   \   000076 72FB 01      ADDW      X, (0x1,SP)
+   \   000079 F6           LD        A, (X)
+   \   00007A 5F           CLRW      X
+   \   00007B 97           LD        XL, A
+   \   00007C 89           PUSHW     X
+   \   00007D AE ....      LDW       X, #`?<Constant " %02X">`
+   \   000080 8D ......    CALLF     xprintf
+   \   000084 5B 02        ADD       SP, #0x2
+   \   000086 90AE 0010    LDW       Y, #0x10
+   \   00008A BE ..        LDW       X, S:?w5
+   \   00008C 8D ......    CALLF     L:?smod16_y_x_y
+   \   000090 90A3 000F    CPW       Y, #0xf
+   \   000094 26 D3        JRNE      L:??__xstd_dump_4
+   \   000096 AE ....      LDW       X, #`?<Constant " ;">`
+   \   000099 8D ......    CALLF     xprintf
+   \   00009D BE ..        LDW       X, S:?w5
+   \   00009F 02           RLWA      X, A
+   \   0000A0 A4 FF        AND       A, #0xffffffffffffffff
+   \   0000A2 02           RLWA      X, A
+   \   0000A3 A4 F0        AND       A, #0xf0
+   \   0000A5 02           RLWA      X, A
+   \   0000A6 BF ..        LDW       S:?w4, X
+   \   0000A8 20 12        JRA       L:??__xstd_dump_6
+   \                     ??__xstd_dump_7:
+   \   0000AA AE 002E      LDW       X, #0x2e
+   \                     ??__xstd_dump_8:
+   \   0000AD 89           PUSHW     X
+   \   0000AE AE ....      LDW       X, #`?<Constant "%c">`
+   \   0000B1 8D ......    CALLF     xprintf
+   \   0000B5 5B 02        ADD       SP, #0x2
+   \   0000B7 BE ..        LDW       X, S:?w4
+   \   0000B9 5C           INCW      X
+   \   0000BA BF ..        LDW       S:?w4, X
+   \                     ??__xstd_dump_6:
+   \   0000BC BE ..        LDW       X, S:?w5
+   \   0000BE B3 ..        CPW       X, S:?w4
+   \   0000C0 2F 87        JRSLT     L:??__xstd_dump_3
+   \   0000C2 BE ..        LDW       X, S:?w4
+   \   0000C4 72FB 01      ADDW      X, (0x1,SP)
+   \   0000C7 F6           LD        A, (X)
+   \   0000C8 5F           CLRW      X
+   \   0000C9 97           LD        XL, A
+   \   0000CA 8D ......    CALLF     isprint
+   \   0000CE 5D           TNZW      X
+   \   0000CF 27 D9        JREQ      L:??__xstd_dump_7
+   \   0000D1 BE ..        LDW       X, S:?w4
+   \   0000D3 72FB 01      ADDW      X, (0x1,SP)
+   \   0000D6 F6           LD        A, (X)
+   \   0000D7 5F           CLRW      X
+   \   0000D8 97           LD        XL, A
+   \   0000D9 20 D2        JRA       L:??__xstd_dump_8
+     97          			}
+     98          		}
+     99          
+    100          		if(i%16)
+   \                     ??__xstd_dump_5:
+   \   0000DB 90AE 0010    LDW       Y, #0x10
+   \   0000DF BE ..        LDW       X, S:?w5
+   \   0000E1 8D ......    CALLF     L:?smod16_y_x_y
+   \   0000E5 905D         TNZW      Y
+   \   0000E7 27 6C        JREQ      L:??__xstd_dump_9
+    101          		{
+    102          			for(n = i; (n%16)!=0 ;n++)
+   \   0000E9 8D ......    CALLF     L:?mov_w4_w5
+   \   0000ED 20 0C        JRA       L:??__xstd_dump_10
+    103          				xprintf("   ");
+   \                     ??__xstd_dump_11:
+   \   0000EF AE ....      LDW       X, #`?<Constant "   ">`
+   \   0000F2 8D ......    CALLF     xprintf
+   \   0000F6 BE ..        LDW       X, S:?w4
+   \   0000F8 5C           INCW      X
+   \   0000F9 BF ..        LDW       S:?w4, X
+   \                     ??__xstd_dump_10:
+   \   0000FB 90AE 0010    LDW       Y, #0x10
+   \   0000FF BE ..        LDW       X, S:?w4
+   \   000101 8D ......    CALLF     L:?smod16_y_x_y
+   \   000105 905D         TNZW      Y
+   \   000107 26 E6        JRNE      L:??__xstd_dump_11
+    104          			xprintf(" ;");
+   \   000109 AE ....      LDW       X, #`?<Constant " ;">`
+   \   00010C 8D ......    CALLF     xprintf
+    105          			for(n = i&0xffffFFF0; n<i; n++)
+   \   000110 BE ..        LDW       X, S:?w5
+   \   000112 02           RLWA      X, A
+   \   000113 A4 FF        AND       A, #0xffffffffffffffff
+   \   000115 02           RLWA      X, A
+   \   000116 A4 F0        AND       A, #0xf0
+   \   000118 02           RLWA      X, A
+   \   000119 BF ..        LDW       S:?w4, X
+   \   00011B 20 12        JRA       L:??__xstd_dump_12
+    106          				xprintf("%c",isprint(pcBuf[n])?pcBuf[n]:'.');
+   \                     ??__xstd_dump_13:
+   \   00011D AE 002E      LDW       X, #0x2e
+   \                     ??__xstd_dump_14:
+   \   000120 89           PUSHW     X
+   \   000121 AE ....      LDW       X, #`?<Constant "%c">`
+   \   000124 8D ......    CALLF     xprintf
+   \   000128 5B 02        ADD       SP, #0x2
+   \   00012A BE ..        LDW       X, S:?w4
+   \   00012C 5C           INCW      X
+   \   00012D BF ..        LDW       S:?w4, X
+   \                     ??__xstd_dump_12:
+   \   00012F BE ..        LDW       X, S:?w4
+   \   000131 B3 ..        CPW       X, S:?w5
+   \   000133 2E 19        JRSGE     L:??__xstd_dump_15
+   \   000135 BE ..        LDW       X, S:?w4
+   \   000137 72FB 01      ADDW      X, (0x1,SP)
+   \   00013A F6           LD        A, (X)
+   \   00013B 5F           CLRW      X
+   \   00013C 97           LD        XL, A
+   \   00013D 8D ......    CALLF     isprint
+   \   000141 5D           TNZW      X
+   \   000142 27 D9        JREQ      L:??__xstd_dump_13
+   \   000144 BE ..        LDW       X, S:?w4
+   \   000146 72FB 01      ADDW      X, (0x1,SP)
+   \   000149 F6           LD        A, (X)
+   \   00014A 5F           CLRW      X
+   \   00014B 97           LD        XL, A
+   \   00014C 20 D2        JRA       L:??__xstd_dump_14
+    107          			xprintf("\r\n");
+   \                     ??__xstd_dump_15:
+   \   00014E AE ....      LDW       X, #`?<Constant "\\r\\n">`
+   \   000151 8D ......    CALLF     xprintf
+    108          		}
+    109          		
+    110          		if(nSize == 0)
+   \                     ??__xstd_dump_9:
+   \   000155 BE ..        LDW       X, S:?w7
+   \   000157 5D           TNZW      X
+   \   000158 26 07        JRNE      L:??__xstd_dump_0
+    111          		{
+    112          			xprintf("\r\n");
+   \   00015A AE ....      LDW       X, #`?<Constant "\\r\\n">`
+   \   00015D 8D ......    CALLF     xprintf
+    113          		}
+    114          
+    115          	}
+    116          	return 0;
+   \                     ??__xstd_dump_0:
+   \   000161 5F           CLRW      X
+   \   000162 5B 02        ADD       SP, #0x2
+   \   000164 AC ......    JPF       L:?epilogue_l2_l3
+    117          }
+
+   \                                 In section .near.rodata, align 1
+   \                     `?<Constant "%-5s%-4d:">`:
+   \   000000 25 2D 35 73  DC8 "%-5s%-4d:"
+   \          25 2D 34 64 
+
+   \                                 In section .near.rodata, align 1
+   \                     `?<Constant " %02X">`:
+   \   000000 20 25 30 32  DC8 " %02X"
+   \          58 00       
+
+   \                                 In section .near.rodata, align 1
+   \                     `?<Constant " ;">`:
+   \   000000 20 3B 00     DC8 " ;"
+
+   \                                 In section .near.rodata, align 1
+   \                     `?<Constant "%c">`:
+   \   000000 25 63 00     DC8 "%c"
+
+   \                                 In section .near.rodata, align 1
+   \                     `?<Constant "\\r\\n">`:
+   \   000000 0D 0A 00     DC8 "\015\012"
+
+   \                                 In section .near.rodata, align 1
+   \                     `?<Constant "%-9s:">`:
+   \   000000 25 2D 39 73  DC8 "%-9s:"
+   \          3A 00       
+
+   \                                 In section .near.rodata, align 1
+   \                     `?<Constant "">`:
+   \   000000 00           DC8 ""
+
+   \                                 In section .near.rodata, align 1
+   \                     `?<Constant "   ">`:
+   \   000000 20 20 20 00  DC8 "   "
+    118          
+    119          
+    120          
+    121          
+    122          
+    123          
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ?<Constant "   ">
+       6  ?<Constant " %02X">
+       3  ?<Constant " ;">
+       1  ?<Constant "">
+      10  ?<Constant "%-5s%-4d:">
+       6  ?<Constant "%-9s:">
+       3  ?<Constant "%c">
+       3  ?<Constant "\r\n">
+      35  _LocaleC_isalpha
+      16  _LocaleC_islower
+      52  _LocaleC_ispunct
+      16  _LocaleC_isupper
+      30  _LocaleC_toupper
+     360  __xstd_dump
+      34  __xstd_printf
+       1  g_nDebufLevel
+       4  get_gdbLevel
+       4  isalpha
+      45  isprint
+       4  ispunct
+      64  mem_cmp
+      78  strcmp_ex
+       4  toupper
+
+ 
+ 746 bytes in section .far_func.text
+   1 byte  in section .near.data
+  36 bytes in section .near.rodata
+ 
+ 540 bytes of CODE  memory (+ 206 bytes shared)
+  36 bytes of CONST memory
+   1 byte  of DATA  memory
+
+Errors: none
+Warnings: none

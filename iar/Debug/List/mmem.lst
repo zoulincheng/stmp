@@ -1,0 +1,350 @@
+###############################################################################
+#                                                                             #
+# IAR C/C++ Compiler V1.42.1.142 for STM8               01/Jul/2016  17:30:46 #
+# Copyright 2010-2013 IAR Systems AB.                                         #
+#                                                                             #
+#    Source file  =  E:\hwpro-2016\20160627_L\utils\lib\mmem.c                #
+#    Command line =  E:\hwpro-2016\20160627_L\utils\lib\mmem.c -e -Ol         #
+#                    --no_cse --no_unroll --no_inline --no_code_motion        #
+#                    --no_tbaa --no_cross_call --debug --code_model medium    #
+#                    --data_model medium -o E:\hwpro-2016\20160627_L\iar\Debu #
+#                    g\Obj\ --dlib_config "C:\Program Files (x86)\IAR         #
+#                    Systems\Embedded Workbench 6.5\stm8\LIB\dlstm8mmn.h" -D  #
+#                    STM8L15X_MD -lC E:\hwpro-2016\20160627_L\iar\Debug\List\ #
+#                     -I E:\hwpro-2016\20160627_L\iar\..\stm8l15x_lib\inc\    #
+#                    -I E:\hwpro-2016\20160627_L\iar\..\user\inc\ -I          #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\xprintf\ -I        #
+#                    E:\hwpro-2016\20160627_L\iar\..\drivers\ -I              #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\ -I                #
+#                    E:\hwpro-2016\20160627_L\iar\..\app\ --vregs 16          #
+#    List file    =  E:\hwpro-2016\20160627_L\iar\Debug\List\mmem.lst         #
+#    Object file  =  E:\hwpro-2016\20160627_L\iar\Debug\Obj\mmem.o            #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+E:\hwpro-2016\20160627_L\utils\lib\mmem.c
+      1          /*
+      2           * Copyright (c) 2005, Swedish Institute of Computer Science
+      3           * All rights reserved.
+      4           *
+      5           * Redistribution and use in source and binary forms, with or without
+      6           * modification, are permitted provided that the following conditions
+      7           * are met:
+      8           * 1. Redistributions of source code must retain the above copyright
+      9           *    notice, this list of conditions and the following disclaimer.
+     10           * 2. Redistributions in binary form must reproduce the above copyright
+     11           *    notice, this list of conditions and the following disclaimer in the
+     12           *    documentation and/or other materials provided with the distribution.
+     13           * 3. Neither the name of the Institute nor the names of its contributors
+     14           *    may be used to endorse or promote products derived from this software
+     15           *    without specific prior written permission.
+     16           *
+     17           * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+     18           * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+     19           * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+     20           * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+     21           * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+     22           * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+     23           * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+     24           * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+     25           * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+     26           * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+     27           * SUCH DAMAGE.
+     28           *
+     29           * This file is part of the Contiki operating system.
+     30           *
+     31           */
+     32          
+     33          /**
+     34           * \addtogroup mmem
+     35           * @{
+     36           */
+     37          
+     38          /**
+     39           * \file
+     40           *         Implementation of the managed memory allocator
+     41           * \author
+     42           *         Adam Dunkels <adam@sics.se>
+     43           * 
+     44           */
+     45          
+     46          
+     47          #include "mmem.h"
+     48          #include "list.h"
+     49          
+     50          #include <string.h>
+     51          
+     52          #ifdef MMEM_CONF_SIZE
+     53          #define MMEM_SIZE MMEM_CONF_SIZE
+     54          #else
+     55          #define MMEM_SIZE 4096
+     56          #endif
+     57          
+
+   \                                 In section .near.data, align 1
+     58          LIST(mmemlist);
+   \                     mmemlist:
+   \   000000 ....         DC16 mmemlist_list
+
+   \                                 In section .near.bss, align 1
+   \   static void *__near mmemlist_list
+   \                     mmemlist_list:
+   \   000000              DS8 2
+
+   \                                 In section .near.bss, align 1
+     59          unsigned int avail_memory;
+   \                     avail_memory:
+   \   000000              DS8 2
+
+   \                                 In section .near.bss, align 1
+     60          static char memory[MMEM_SIZE];
+   \                     memory:
+   \   000000              DS8 4096
+     61          
+     62          /*---------------------------------------------------------------------------*/
+     63          /**
+     64           * \brief      Allocate a managed memory block
+     65           * \param m    A pointer to a struct mmem.
+     66           * \param size The size of the requested memory block
+     67           * \return     Non-zero if the memory could be allocated, zero if memory
+     68           *             was not available.
+     69           * \author     Adam Dunkels
+     70           *
+     71           *             This function allocates a chunk of managed memory. The
+     72           *             memory allocated with this function must be deallocated
+     73           *             using the mmem_free() function.
+     74           *
+     75           *             \note This function does NOT return a pointer to the
+     76           *             allocated memory, but a pointer to a structure that
+     77           *             contains information about the managed memory. The
+     78           *             macro MMEM_PTR() is used to get a pointer to the
+     79           *             allocated memory.
+     80           *
+     81           */
+
+   \                                 In section .far_func.text, align 1
+     82          int
+     83          mmem_alloc(struct mmem *m, unsigned int size)
+     84          {
+   \                     mmem_alloc:
+   \   000000 8D ......    CALLF     L:?push_l2
+   \   000004 BF ..        LDW       S:?w4, X
+   \   000006 90BF ..      LDW       S:?w5, Y
+     85            /* Check if we have enough memory left for this allocation. */
+     86            if(avail_memory < size) {
+   \   000009 CE ....      LDW       X, L:avail_memory
+   \   00000C B3 ..        CPW       X, S:?w5
+   \   00000E 24 05        JRNC      L:??mmem_alloc_0
+     87              return 0;
+   \   000010 5F           CLRW      X
+   \   000011 AC ......    JPF       L:?epilogue_l2
+     88            }
+     89          
+     90            /* We had enough memory so we add this memory block to the end of
+     91               the list of allocated memory blocks. */
+     92            list_add(mmemlist, m);
+   \                     ??mmem_alloc_0:
+   \   000015 90BE ..      LDW       Y, S:?w4
+   \   000018 CE ....      LDW       X, L:mmemlist
+   \   00001B 8D ......    CALLF     list_add
+     93          
+     94            /* Set up the pointer so that it points to the first available byte
+     95               in the memory block. */
+     96            m->ptr = &memory[MMEM_SIZE - avail_memory];
+   \   00001F CE ....      LDW       X, L:avail_memory
+   \   000022 9093         LDW       Y, X
+   \   000024 93           LDW       X, Y
+   \   000025 50           NEGW      X
+   \   000026 1C ....      ADDW      X, #memory + 4096
+   \   000029 9093         LDW       Y, X
+   \   00002B BE ..        LDW       X, S:?w4
+   \   00002D 1C 0004      ADDW      X, #0x4
+   \   000030 BF ..        LDW       S:?w0, X
+   \   000032 91CF ..      LDW       [S:?w0.w], Y
+     97          
+     98            /* Remember the size of this memory block. */
+     99            m->size = size;
+   \   000035 BE ..        LDW       X, S:?w4
+   \   000037 1C 0002      ADDW      X, #0x2
+   \   00003A 90BE ..      LDW       Y, S:?w5
+   \   00003D FF           LDW       (X), Y
+    100          
+    101            /* Decrease the amount of available memory. */
+    102            avail_memory -= size;
+   \   00003E CE ....      LDW       X, L:avail_memory
+   \   000041 72B0 ....    SUBW      X, S:?w5
+   \   000045 CF ....      LDW       L:avail_memory, X
+    103          
+    104            /* Return non-zero to indicate that we were able to allocate
+    105               memory. */
+    106            return 1;
+   \   000048 5F           CLRW      X
+   \   000049 5C           INCW      X
+   \   00004A AC ......    JPF       L:?epilogue_l2
+    107          }
+    108          /*---------------------------------------------------------------------------*/
+    109          /**
+    110           * \brief      Deallocate a managed memory block
+    111           * \param m    A pointer to the managed memory block
+    112           * \author     Adam Dunkels
+    113           *
+    114           *             This function deallocates a managed memory block that
+    115           *             previously has been allocated with mmem_alloc().
+    116           *
+    117           */
+
+   \                                 In section .far_func.text, align 1
+    118          void
+    119          mmem_free(struct mmem *m)
+    120          {
+   \                     mmem_free:
+   \   000000 8D ......    CALLF     L:?push_w4
+   \   000004 BF ..        LDW       S:?w4, X
+    121            struct mmem *n;
+    122          
+    123            if(m->next != NULL) {
+   \   000006 92CE ..      LDW       X, [S:?w4.w]
+   \   000009 5D           TNZW      X
+   \   00000A 27 61        JREQ      L:??mmem_free_0
+    124              /* Compact the memory after the allocation that is to be removed
+    125                 by moving it downwards. */
+    126              memmove(m->ptr, m->next->ptr,
+    127          	    &memory[MMEM_SIZE - avail_memory] - (char *)m->next->ptr);
+   \   00000C CE ....      LDW       X, L:avail_memory
+   \   00000F 9093         LDW       Y, X
+   \   000011 93           LDW       X, Y
+   \   000012 50           NEGW      X
+   \   000013 1C ....      ADDW      X, #memory + 4096
+   \   000016 9093         LDW       Y, X
+   \   000018 92CE ..      LDW       X, [S:?w4.w]
+   \   00001B 1C 0004      ADDW      X, #0x4
+   \   00001E FE           LDW       X, (X)
+   \   00001F BF ..        LDW       S:?w0, X
+   \   000021 93           LDW       X, Y
+   \   000022 72B0 ....    SUBW      X, S:?w0
+   \   000026 BF ..        LDW       S:?w0, X
+   \   000028 91CE ..      LDW       Y, [S:?w4.w]
+   \   00002B 72A9 0004    ADDW      Y, #0x4
+   \   00002F 90FE         LDW       Y, (Y)
+   \   000031 BE ..        LDW       X, S:?w4
+   \   000033 1C 0004      ADDW      X, #0x4
+   \   000036 FE           LDW       X, (X)
+   \   000037 8D ......    CALLF     memmove
+    128              
+    129              /* Update all the memory pointers that points to memory that is
+    130                 after the allocation that is to be removed. */
+    131              for(n = m->next; n != NULL; n = n->next) {
+   \   00003B 92CE ..      LDW       X, [S:?w4.w]
+   \   00003E 9093         LDW       Y, X
+   \   000040 20 27        JRA       L:??mmem_free_1
+    132                n->ptr = (void *)((char *)n->ptr - m->size);
+   \                     ??mmem_free_2:
+   \   000042 BE ..        LDW       X, S:?w4
+   \   000044 1C 0002      ADDW      X, #0x2
+   \   000047 FE           LDW       X, (X)
+   \   000048 BF ..        LDW       S:?w0, X
+   \   00004A BE ..        LDW       X, S:?w0
+   \   00004C 50           NEGW      X
+   \   00004D BF ..        LDW       S:?w0, X
+   \   00004F 93           LDW       X, Y
+   \   000050 1C 0004      ADDW      X, #0x4
+   \   000053 FE           LDW       X, (X)
+   \   000054 72BB ....    ADDW      X, S:?w0
+   \   000058 BF ..        LDW       S:?w0, X
+   \   00005A 93           LDW       X, Y
+   \   00005B 1C 0004      ADDW      X, #0x4
+   \   00005E BF ..        LDW       S:?w1, X
+   \   000060 BE ..        LDW       X, S:?w0
+   \   000062 92CF ..      LDW       [S:?w1.w], X
+    133              }
+   \   000065 93           LDW       X, Y
+   \   000066 FE           LDW       X, (X)
+   \   000067 9093         LDW       Y, X
+   \                     ??mmem_free_1:
+   \   000069 905D         TNZW      Y
+   \   00006B 26 D5        JRNE      L:??mmem_free_2
+    134            }
+    135          
+    136            avail_memory += m->size;
+   \                     ??mmem_free_0:
+   \   00006D BE ..        LDW       X, S:?w4
+   \   00006F 1C 0002      ADDW      X, #0x2
+   \   000072 FE           LDW       X, (X)
+   \   000073 72BB ....    ADDW      X, L:avail_memory
+   \   000077 CF ....      LDW       L:avail_memory, X
+    137          
+    138            /* Remove the memory block from the list. */
+    139            list_remove(mmemlist, m);
+   \   00007A 90BE ..      LDW       Y, S:?w4
+   \   00007D CE ....      LDW       X, L:mmemlist
+   \   000080 8D ......    CALLF     list_remove
+    140          }
+   \   000084 AC ......    JPF       L:?epilogue_w4
+    141          /*---------------------------------------------------------------------------*/
+    142          /**
+    143           * \brief      Initialize the managed memory module
+    144           * \author     Adam Dunkels
+    145           *
+    146           *             This function initializes the managed memory module and
+    147           *             should be called before any other function from the
+    148           *             module.
+    149           *
+    150           */
+
+   \                                 In section .far_func.text, align 1
+    151          void
+    152          mmem_init(void)
+    153          {
+    154            static int inited = 0;
+    155            if(inited) {
+   \                     mmem_init:
+   \   000000 CE ....      LDW       X, L:??inited
+   \   000003 5D           TNZW      X
+   \   000004 26 12        JRNE      L:??mmem_init_0
+    156              return;
+    157            }
+    158            list_init(mmemlist);
+   \   000006 CE ....      LDW       X, L:mmemlist
+   \   000009 8D ......    CALLF     list_init
+    159            avail_memory = MMEM_SIZE;
+   \   00000D AE 1000      LDW       X, #0x1000
+   \   000010 CF ....      LDW       L:avail_memory, X
+    160            inited = 1;
+   \   000013 5F           CLRW      X
+   \   000014 5C           INCW      X
+   \   000015 CF ....      LDW       L:??inited, X
+    161          }
+   \                     ??mmem_init_0:
+   \   000018 87           RETF
+
+   \                                 In section .near.bss, align 1
+   \                     ??inited:
+   \   000000              DS8 2
+    162          /*---------------------------------------------------------------------------*/
+    163          
+    164          /** @} */
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       2  avail_memory
+       2  inited
+    4096  memory
+      78  mmem_alloc
+     136  mmem_free
+      25  mmem_init
+       2  mmemlist
+       2  mmemlist_list
+
+ 
+   239 bytes in section .far_func.text
+ 4 102 bytes in section .near.bss
+     2 bytes in section .near.data
+ 
+   239 bytes of CODE memory
+ 4 104 bytes of DATA memory
+
+Errors: none
+Warnings: none

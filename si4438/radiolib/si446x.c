@@ -1175,6 +1175,8 @@ static void si446x_rst( )
 static void si446x_nIRQ_Config(void)
 {
 	//RF_NIRQ_CFG( );
+	EXTI_SetPinSensitivity(EXTI_Pin_4, EXTI_Trigger_Falling);
+	GPIO_Init(RF_NIRQ_PORT, RF_NIRQ_PIN, GPIO_Mode_In_PU_IT);
 }
 
 //open nirq pin interrupt

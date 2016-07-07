@@ -1,0 +1,310 @@
+###############################################################################
+#                                                                             #
+# IAR C/C++ Compiler V1.42.1.142 for STM8               01/Jul/2016  17:36:13 #
+# Copyright 2010-2013 IAR Systems AB.                                         #
+#                                                                             #
+#    Source file  =  E:\hwpro-2016\20160627_L\utils\lib\ringbuf.c             #
+#    Command line =  E:\hwpro-2016\20160627_L\utils\lib\ringbuf.c -e -Ol      #
+#                    --no_cse --no_unroll --no_inline --no_code_motion        #
+#                    --no_tbaa --no_cross_call --debug --code_model medium    #
+#                    --data_model medium -o E:\hwpro-2016\20160627_L\iar\Debu #
+#                    g\Obj\ --dlib_config "C:\Program Files (x86)\IAR         #
+#                    Systems\Embedded Workbench 6.5\stm8\LIB\dlstm8mmn.h" -D  #
+#                    STM8L15X_MD -lC E:\hwpro-2016\20160627_L\iar\Debug\List\ #
+#                     -I E:\hwpro-2016\20160627_L\iar\..\stm8l15x_lib\inc\    #
+#                    -I E:\hwpro-2016\20160627_L\iar\..\user\inc\ -I          #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\xprintf\ -I        #
+#                    E:\hwpro-2016\20160627_L\iar\..\drivers\ -I              #
+#                    E:\hwpro-2016\20160627_L\iar\..\utils\ -I                #
+#                    E:\hwpro-2016\20160627_L\iar\..\app\ --vregs 16          #
+#    List file    =  E:\hwpro-2016\20160627_L\iar\Debug\List\ringbuf.lst      #
+#    Object file  =  E:\hwpro-2016\20160627_L\iar\Debug\Obj\ringbuf.o         #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+E:\hwpro-2016\20160627_L\utils\lib\ringbuf.c
+      1          /*
+      2           * Copyright (c) 2008, Swedish Institute of Computer Science.
+      3           * All rights reserved.
+      4           *
+      5           * Redistribution and use in source and binary forms, with or without
+      6           * modification, are permitted provided that the following conditions
+      7           * are met:
+      8           * 1. Redistributions of source code must retain the above copyright
+      9           *    notice, this list of conditions and the following disclaimer.
+     10           * 2. Redistributions in binary form must reproduce the above copyright
+     11           *    notice, this list of conditions and the following disclaimer in the
+     12           *    documentation and/or other materials provided with the distribution.
+     13           * 3. Neither the name of the Institute nor the names of its contributors
+     14           *    may be used to endorse or promote products derived from this software
+     15           *    without specific prior written permission.
+     16           *
+     17           * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+     18           * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+     19           * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+     20           * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+     21           * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+     22           * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+     23           * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+     24           * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+     25           * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+     26           * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+     27           * SUCH DAMAGE.
+     28           *
+     29           * This file is part of the Contiki operating system.
+     30           *
+     31           */
+     32          
+     33          /**
+     34           * \file
+     35           *         Ring buffer library implementation
+     36           * \author
+     37           *         Adam Dunkels <adam@sics.se>
+     38           */
+     39          
+     40          
+     41          #include "lib/ringbuf.h"
+     42          
+     43          /*---------------------------------------------------------------------------*/
+
+   \                                 In section .far_func.text, align 1
+     44          void
+     45          ringbuf_init(struct ringbuf *r, uint8_t *dataptr, uint8_t size)
+     46          {
+     47            r->data = dataptr;
+   \                     ringbuf_init:
+   \   000000 FF           LDW       (X), Y
+     48            r->mask = size - 1;
+   \   000001 AB FF        ADD       A, #0xff
+   \   000003 9093         LDW       Y, X
+   \   000005 72A9 0002    ADDW      Y, #0x2
+   \   000009 90F7         LD        (Y), A
+     49            r->put_ptr = 0;
+   \   00000B 9093         LDW       Y, X
+   \   00000D 72A9 0003    ADDW      Y, #0x3
+   \   000011 4F           CLR       A
+   \   000012 90F7         LD        (Y), A
+     50            r->get_ptr = 0;
+   \   000014 1C 0004      ADDW      X, #0x4
+   \   000017 4F           CLR       A
+   \   000018 F7           LD        (X), A
+     51          }
+   \   000019 87           RETF
+     52          /*---------------------------------------------------------------------------*/
+
+   \                                 In section .far_func.text, align 1
+     53          int
+     54          ringbuf_put(struct ringbuf *r, uint8_t c)
+     55          {
+   \                     ringbuf_put:
+   \   000000 9093         LDW       Y, X
+   \   000002 B7 ..        LD        S:?b2, A
+     56            /* Check if buffer is full. If it is full, return 0 to indicate that
+     57               the element was not inserted into the buffer.
+     58          
+     59               XXX: there is a potential risk for a race condition here, because
+     60               the ->get_ptr field may be written concurrently by the
+     61               ringbuf_get() function. To avoid this, access to ->get_ptr must
+     62               be atomic. We use an uint8_t type, which makes access atomic on
+     63               most platforms, but C does not guarantee this.
+     64            */
+     65            if(((r->put_ptr - r->get_ptr) & r->mask) == r->mask) {
+   \   000004 93           LDW       X, Y
+   \   000005 1C 0004      ADDW      X, #0x4
+   \   000008 BF ..        LDW       S:?w0, X
+   \   00000A 93           LDW       X, Y
+   \   00000B 1C 0003      ADDW      X, #0x3
+   \   00000E F6           LD        A, (X)
+   \   00000F 92C0 ..      SUB       A, [S:?w0.w]
+   \   000012 93           LDW       X, Y
+   \   000013 1C 0002      ADDW      X, #0x2
+   \   000016 F4           AND       A, (X)
+   \   000017 93           LDW       X, Y
+   \   000018 1C 0002      ADDW      X, #0x2
+   \   00001B F1           CP        A, (X)
+   \   00001C 26 02        JRNE      L:??ringbuf_put_0
+     66              return 0;
+   \   00001E 5F           CLRW      X
+   \   00001F 87           RETF
+     67            }
+     68            /*
+     69             * CC_ACCESS_NOW is used because the compiler is allowed to reorder
+     70             * the access to non-volatile variables.
+     71             * In this case a reader might read from the moved index/ptr before
+     72             * its value (c) is written. Reordering makes little sense, but
+     73             * better safe than sorry.
+     74             */
+     75            CC_ACCESS_NOW(uint8_t, r->data[r->put_ptr]) = c;
+   \                     ??ringbuf_put_0:
+   \   000020 93           LDW       X, Y
+   \   000021 1C 0003      ADDW      X, #0x3
+   \   000024 F6           LD        A, (X)
+   \   000025 5F           CLRW      X
+   \   000026 97           LD        XL, A
+   \   000027 BF ..        LDW       S:?w0, X
+   \   000029 93           LDW       X, Y
+   \   00002A FE           LDW       X, (X)
+   \   00002B 72BB ....    ADDW      X, S:?w0
+   \   00002F B6 ..        LD        A, S:?b2
+   \   000031 F7           LD        (X), A
+     76            CC_ACCESS_NOW(uint8_t, r->put_ptr) = (r->put_ptr + 1) & r->mask;
+   \   000032 93           LDW       X, Y
+   \   000033 1C 0003      ADDW      X, #0x3
+   \   000036 F6           LD        A, (X)
+   \   000037 AB 01        ADD       A, #0x1
+   \   000039 93           LDW       X, Y
+   \   00003A 1C 0002      ADDW      X, #0x2
+   \   00003D F4           AND       A, (X)
+   \   00003E 72A9 0003    ADDW      Y, #0x3
+   \   000042 90F7         LD        (Y), A
+     77            return 1;
+   \   000044 5F           CLRW      X
+   \   000045 5C           INCW      X
+   \   000046 87           RETF
+     78          }
+     79          /*---------------------------------------------------------------------------*/
+
+   \                                 In section .far_func.text, align 1
+     80          int
+     81          ringbuf_get(struct ringbuf *r)
+     82          {
+   \                     ringbuf_get:
+   \   000000 9093         LDW       Y, X
+     83            uint8_t c;
+     84            
+     85            /* Check if there are bytes in the buffer. If so, we return the
+     86               first one and increase the pointer. If there are no bytes left, we
+     87               return -1.
+     88          
+     89               XXX: there is a potential risk for a race condition here, because
+     90               the ->put_ptr field may be written concurrently by the
+     91               ringbuf_put() function. To avoid this, access to ->get_ptr must
+     92               be atomic. We use an uint8_t type, which makes access atomic on
+     93               most platforms, but C does not guarantee this.
+     94            */
+     95            if(((r->put_ptr - r->get_ptr) & r->mask) > 0) {
+   \   000002 93           LDW       X, Y
+   \   000003 1C 0004      ADDW      X, #0x4
+   \   000006 BF ..        LDW       S:?w0, X
+   \   000008 93           LDW       X, Y
+   \   000009 1C 0003      ADDW      X, #0x3
+   \   00000C F6           LD        A, (X)
+   \   00000D 92C0 ..      SUB       A, [S:?w0.w]
+   \   000010 93           LDW       X, Y
+   \   000011 1C 0002      ADDW      X, #0x2
+   \   000014 F4           AND       A, (X)
+   \   000015 A1 01        CP        A, #0x1
+   \   000017 25 2A        JRC       L:??ringbuf_get_0
+     96              /*
+     97               * CC_ACCESS_NOW is used because the compiler is allowed to reorder
+     98               * the access to non-volatile variables.
+     99               * In this case the memory might be freed and overwritten by
+    100               * increasing get_ptr before the value was copied to c.
+    101               * Opposed to the put-operation this would even make sense,
+    102               * because the register used for mask can be reused to save c
+    103               * (on some architectures).
+    104               */
+    105              c = CC_ACCESS_NOW(uint8_t, r->data[r->get_ptr]);
+   \   000019 93           LDW       X, Y
+   \   00001A 1C 0004      ADDW      X, #0x4
+   \   00001D F6           LD        A, (X)
+   \   00001E 5F           CLRW      X
+   \   00001F 97           LD        XL, A
+   \   000020 BF ..        LDW       S:?w0, X
+   \   000022 93           LDW       X, Y
+   \   000023 FE           LDW       X, (X)
+   \   000024 72BB ....    ADDW      X, S:?w0
+   \   000028 F6           LD        A, (X)
+   \   000029 B7 ..        LD        S:?b0, A
+    106              CC_ACCESS_NOW(uint8_t, r->get_ptr) = (r->get_ptr + 1) & r->mask;
+   \   00002B 93           LDW       X, Y
+   \   00002C 1C 0004      ADDW      X, #0x4
+   \   00002F F6           LD        A, (X)
+   \   000030 AB 01        ADD       A, #0x1
+   \   000032 93           LDW       X, Y
+   \   000033 1C 0002      ADDW      X, #0x2
+   \   000036 F4           AND       A, (X)
+   \   000037 72A9 0004    ADDW      Y, #0x4
+   \   00003B 90F7         LD        (Y), A
+    107              return c;
+   \   00003D 5F           CLRW      X
+   \   00003E 41           EXG       A, XL
+   \   00003F B6 ..        LD        A, S:?b0
+   \   000041 41           EXG       A, XL
+   \   000042 87           RETF
+    108            } else {
+    109              return -1;
+   \                     ??ringbuf_get_0:
+   \   000043 5F           CLRW      X
+   \   000044 5A           DECW      X
+   \   000045 87           RETF
+    110            }
+    111          }
+    112          /*---------------------------------------------------------------------------*/
+
+   \                                 In section .far_func.text, align 1
+    113          int
+    114          ringbuf_size(struct ringbuf *r)
+    115          {
+    116            return r->mask + 1;
+   \                     ringbuf_size:
+   \   000000 1C 0002      ADDW      X, #0x2
+   \   000003 F6           LD        A, (X)
+   \   000004 5F           CLRW      X
+   \   000005 97           LD        XL, A
+   \   000006 5C           INCW      X
+   \   000007 87           RETF
+    117          }
+    118          /*---------------------------------------------------------------------------*/
+
+   \                                 In section .far_func.text, align 1
+    119          int
+    120          ringbuf_elements(struct ringbuf *r)
+    121          {
+   \                     ringbuf_elements:
+   \   000000 9093         LDW       Y, X
+    122            return (r->put_ptr - r->get_ptr) & r->mask;
+   \   000002 93           LDW       X, Y
+   \   000003 1C 0004      ADDW      X, #0x4
+   \   000006 F6           LD        A, (X)
+   \   000007 5F           CLRW      X
+   \   000008 97           LD        XL, A
+   \   000009 BF ..        LDW       S:?w0, X
+   \   00000B 93           LDW       X, Y
+   \   00000C 1C 0003      ADDW      X, #0x3
+   \   00000F F6           LD        A, (X)
+   \   000010 5F           CLRW      X
+   \   000011 97           LD        XL, A
+   \   000012 72B0 ....    SUBW      X, S:?w0
+   \   000016 72A9 0002    ADDW      Y, #0x2
+   \   00001A 90F6         LD        A, (Y)
+   \   00001C 905F         CLRW      Y
+   \   00001E 9097         LD        YL, A
+   \   000020 90BF ..      LDW       S:?w0, Y
+   \   000023 01           RRWA      X, A
+   \   000024 B4 ..        AND       A, S:?b1
+   \   000026 01           RRWA      X, A
+   \   000027 B4 ..        AND       A, S:?b0
+   \   000029 01           RRWA      X, A
+   \   00002A 87           RETF
+    123          }
+    124          /*---------------------------------------------------------------------------*/
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      43  ringbuf_elements
+      70  ringbuf_get
+      26  ringbuf_init
+      71  ringbuf_put
+       8  ringbuf_size
+
+ 
+ 218 bytes in section .far_func.text
+ 
+ 218 bytes of CODE memory
+
+Errors: none
+Warnings: none
